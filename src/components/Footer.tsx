@@ -54,12 +54,12 @@ export default function Footer({ t }: FooterProps) {
           </a>
           <span>·</span>
           <a
-            href="https://buffons-needle.vercel.app"
+            href="https://buffons-needle.sejtam.eu/"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-violet-500 transition-colors"
           >
-            buffons-needle.vercel.app
+            buffons-needle.sejtam.eu/
           </a>
         </div>
 

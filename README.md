@@ -2,11 +2,11 @@
 
 [![CI](https://github.com/sejtam-dev/buffons-needle/actions/workflows/ci.yml/badge.svg)](https://github.com/sejtam-dev/buffons-needle/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-violet.svg)](./LICENSE)
-[![Live Demo](https://img.shields.io/badge/demo-buffons--needle.vercel.app-7c3aed)](https://buffons-needle.vercel.app)
+[![Live Demo](https://img.shields.io/badge/demo-buffons--needle.vercel.app-7c3aed)](https://buffons-needle.sejtam.eu/)
 
 Interactive simulation of the Buffon's Needle experiment — drop needles onto a lined surface and watch π emerge from the chaos.
 
-**[→ Live demo](https://buffons-needle.vercel.app)**
+**[→ Live demo](https://buffons-needle.sejtam.eu/)**
 
 ## What is this?
 
