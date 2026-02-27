@@ -36,7 +36,7 @@ export default function InfoModal({ t, onClose }: InfoModalProps) {
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
       {/* Panel */}
-      <div className="relative w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden border" style={{ background: "var(--bg-panel)", borderColor: "var(--border)" }}>
+        <div className="relative w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden border" style={{ background: "var(--bg-panel-solid)", borderColor: "var(--border)" }}>
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: "var(--border)" }}>
           <h2 className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>{t.panelHowItWorks}</h2>

@@ -2,24 +2,26 @@
 
 /* Light mode defaults */
 :root {
-    --bg-base:      #f1f5f9;
-    --bg-panel:     #ffffff;
-    --bg-panel-alt: #f8fafc;
-    --border:       #e2e8f0;
-    --text-primary: #0f172a;
-    --text-muted:   #64748b;
-    --text-subtle:  #94a3b8;
+    --bg-base:        #f1f5f9;
+    --bg-panel:       #ffffff;
+    --bg-panel-alt:   #f8fafc;
+    --bg-panel-solid: #ffffff;
+    --border:         #e2e8f0;
+    --text-primary:   #0f172a;
+    --text-muted:     #64748b;
+    --text-subtle:    #94a3b8;
 }
 
 /* Dark mode overrides (applied via .dark on <html>) */
 .dark {
-    --bg-base:      #0f172a;
-    --bg-panel:     rgba(30,41,59,0.6);
-    --bg-panel-alt: rgba(15,23,42,0.7);
-    --border:       rgba(51,65,85,0.5);
-    --text-primary: #f1f5f9;
-    --text-muted:   #94a3b8;
-    --text-subtle:  #64748b;
+    --bg-base:        #0f172a;
+    --bg-panel:       rgba(30,41,59,0.6);
+    --bg-panel-alt:   rgba(15,23,42,0.7);
+    --bg-panel-solid: #1e293b;
+    --border:         rgba(51,65,85,0.5);
+    --text-primary:   #f1f5f9;
+    --text-muted:     #94a3b8;
+    --text-subtle:    #64748b;
 }
 
 @theme inline {

@@ -25,7 +25,7 @@ interface UseSimulationReturn {
   stats: SimulationStats;
   config: SimulationConfig;
   isRunning: boolean;
-  canvasRef: React.MutableRefObject<NeedleCanvasHandle | null>;
+  canvasRef: React.RefObject<NeedleCanvasHandle | null>;
   setConfig: (cfg: SimulationConfig) => void;
   start: () => void;
   pause: () => void;
