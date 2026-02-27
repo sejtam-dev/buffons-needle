@@ -127,21 +127,19 @@ function ActionButtons({ isRunning, t, onStart, onPause, onReset, onDropOne }: {
  */
 export default function SidebarPanel({ config, stats, isRunning, t, onConfigChange, onStart, onPause, onReset, onDropOne }: SidebarPanelProps) {
   const [tab, setTab] = useState<"params" | "stats">("params");
-  const [draft, setDraft] = useState<SimulationConfig>(config);
-  const [sliderPos, setSliderPos] = useState(() => speedToSlider(config.speed));
+
+  // Derive slider position from config.speed — no local state needed
+  const sliderPos = speedToSlider(config.speed);
 
   function update(partial: Partial<SimulationConfig>) {
-    const next = { ...draft, ...partial };
-    setDraft(next);
-    onConfigChange(next);
+    onConfigChange({ ...config, ...partial });
   }
 
   function handleSpeedSlider(pos: number) {
-    setSliderPos(pos);
-    update({ speed: parseFloat(sliderToSpeed(pos).toFixed(2)) });
+    onConfigChange({ ...config, speed: parseFloat(sliderToSpeed(pos).toFixed(2)) });
   }
 
-  const speedLabel = draft.speed >= 1 ? `×${Math.floor(draft.speed)}` : `1/${speedToFrameInterval(draft.speed)}`;
+  const speedLabel = config.speed >= 1 ? `×${Math.floor(config.speed)}` : `1/${speedToFrameInterval(config.speed)}`;
 
   const { total, crossings, piEstimate, error } = stats;
   const piDisplay = piEstimate !== null ? piEstimate.toFixed(6) : "—";
@@ -171,18 +169,18 @@ export default function SidebarPanel({ config, stats, isRunning, t, onConfigChan
           <>
             <p className="text-xs" style={{ color: "var(--text-subtle)" }}>{t.panelNeedleConstraint}</p>
             <SliderField
-              label={t.labelNeedleLength} value={draft.needleLength} min={10} max={draft.lineSpacing} step={1}
-              displayValue={`${draft.needleLength} px`} description={t.descNeedleLength}
+              label={t.labelNeedleLength} value={config.needleLength} min={10} max={config.lineSpacing} step={1}
+              displayValue={`${config.needleLength} px`} description={t.descNeedleLength}
               onChange={(v) => update({ needleLength: v })} disabled={isRunning}
             />
             <SliderField
-              label={t.labelLineSpacing} value={draft.lineSpacing} min={30} max={200} step={5}
-              displayValue={`${draft.lineSpacing} px`} description={t.descLineSpacing}
-              onChange={(v) => update({ lineSpacing: v, needleLength: Math.min(draft.needleLength, v) })} disabled={isRunning}
+              label={t.labelLineSpacing} value={config.lineSpacing} min={30} max={200} step={5}
+              displayValue={`${config.lineSpacing} px`} description={t.descLineSpacing}
+              onChange={(v) => update({ lineSpacing: v, needleLength: Math.min(config.needleLength, v) })} disabled={isRunning}
             />
             <SliderField
-              label={t.labelMaxNeedles} value={draft.maxNeedles} min={100} max={50000} step={100}
-              displayValue={draft.maxNeedles.toLocaleString()} description={t.descMaxNeedles}
+              label={t.labelMaxNeedles} value={config.maxNeedles} min={100} max={50000} step={100}
+              displayValue={config.maxNeedles.toLocaleString()} description={t.descMaxNeedles}
               onChange={(v) => update({ maxNeedles: v })} disabled={isRunning}
             />
           </>
@@ -214,7 +212,7 @@ export default function SidebarPanel({ config, stats, isRunning, t, onConfigChan
           className="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-violet-500"
           style={{ background: "var(--border)" }}
         />
-        <p className="text-xs" style={{ color: "var(--text-subtle)" }}>{formatSpeedDesc(draft.speed, t)}</p>
+        <p className="text-xs" style={{ color: "var(--text-subtle)" }}>{formatSpeedDesc(config.speed, t)}</p>
       </div>
 
       {/* Action buttons — always visible */}

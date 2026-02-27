@@ -52,6 +52,9 @@ export interface Translations {
   infoConverge: string;
   /** Short hint shown below the canvas */
   clickToDropHint: string;
+  // Footer
+  footerStar: string;
+  footerFork: string;
 }
 
 const en: Translations = {
@@ -90,6 +93,8 @@ const en: Translations = {
   infoAfter: "After {n} throws with {c} crossings, we estimate:",
   infoConverge: "The more needles dropped, the closer the estimate converges to the true value of π ≈ 3.14159…",
   clickToDropHint: "Click on the canvas to drop a needle at that position",
+  footerStar: "Star on GitHub",
+  footerFork: "Fork",
 };
 
 const cs: Translations = {
@@ -128,6 +133,8 @@ const cs: Translations = {
   infoAfter: "Po {n} hodech s {c} průsečíky odhadujeme:",
   infoConverge: "Čím více jehel, tím přesněji se odhad blíží skutečné hodnotě π ≈ 3,14159…",
   clickToDropHint: "Kliknutím na plátno hodíte jehlu na dané místo",
+  footerStar: "Hvězda na GitHubu",
+  footerFork: "Forkovat",
 };
 
 const de: Translations = {
@@ -166,6 +173,8 @@ const de: Translations = {
   infoAfter: "Nach {n} Würfen mit {c} Schnitten schätzen wir:",
   infoConverge: "Je mehr Nadeln, desto näher konvergiert die Schätzung zum wahren Wert π ≈ 3,14159…",
   clickToDropHint: "Klicken Sie auf die Leinwand, um eine Nadel an dieser Stelle zu werfen",
+  footerStar: "Stern auf GitHub",
+  footerFork: "Forken",
 };
 
 const fr: Translations = {
@@ -204,6 +213,8 @@ const fr: Translations = {
   infoAfter: "Après {n} lancers avec {c} croisements, on estime :",
   infoConverge: "Plus il y a d'aiguilles, plus l'estimation converge vers la vraie valeur de π ≈ 3,14159…",
   clickToDropHint: "Cliquez sur le canvas pour lancer une aiguille à cet endroit",
+  footerStar: "Étoile sur GitHub",
+  footerFork: "Forker",
 };
 
 export const LOCALES: Record<LocaleCode, { label: string; flag: string }> = {

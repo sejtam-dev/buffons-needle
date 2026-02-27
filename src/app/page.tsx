@@ -5,6 +5,7 @@ import NeedleCanvas from "@/components/NeedleCanvas";
 import SidebarPanel from "@/components/ControlPanel";
 import InfoModal from "@/components/InfoPanel";
 import LocaleSwitcher from "@/components/LocaleSwitcher";
+import Footer from "@/components/Footer";
 import { useSimulation } from "@/hooks/useSimulation";
 import { useLocale } from "@/i18n/useLocale";
 import { useTheme } from "@/context/ThemeContext";
@@ -151,6 +152,8 @@ export default function HomePage() {
 
       {/* Info modal — rendered via portal */}
       {infoOpen && <InfoModal t={t} onClose={() => setInfoOpen(false)} />}
+
+      <Footer t={t} />
     </main>
   );
 }
