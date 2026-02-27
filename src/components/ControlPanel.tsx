@@ -191,7 +191,6 @@ export default function SidebarPanel({ config, stats, isRunning, t, onConfigChan
             <StatRow label={t.statNeedlesDropped} value={total.toLocaleString()} />
             <StatRow label={t.statCrossingLines} value={crossings.toLocaleString()} />
             <StatRow label={t.statCrossingRatio} value={crossingPct} />
-            <div className="border-t my-1" style={{ borderColor: "var(--border)" }} />
             <StatRow label={t.statPiReal} value={Math.PI.toFixed(6)} />
             <StatRow label={t.statPiEstimated} value={piDisplay} highlight />
             <StatRow label={t.statAbsError} value={errorDisplay} />
