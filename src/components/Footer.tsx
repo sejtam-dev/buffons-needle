@@ -59,7 +59,7 @@ export default function Footer({ t }: FooterProps) {
             rel="noopener noreferrer"
             className="hover:text-violet-500 transition-colors"
           >
-            buffons-needle.sejtam.eu/
+            buffons-needle.sejtam.eu
           </a>
         </div>
 
