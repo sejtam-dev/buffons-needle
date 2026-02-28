@@ -1,13 +1,9 @@
 "use client";
 
 import React from "react";
-import type { Translations } from "@/i18n/useLocale";
+import { useTranslations } from "next-intl";
 
 const REPO = "https://github.com/sejtam-dev/buffons-needle";
-
-interface FooterProps {
-  t: Translations;
-}
 
 function GitHubIcon() {
   return (
@@ -35,72 +31,39 @@ function ForkIcon() {
 
 /**
  * Page footer with copyright, GitHub repo link, star and fork buttons.
+ * Uses useTranslations() directly — no t prop needed.
  */
-export default function Footer({ t }: FooterProps) {
+export default function Footer() {
+  const t = useTranslations();
+
   return (
     <footer className="border-t mt-8" style={{ borderColor: "var(--border)" }}>
       <div className="max-w-7xl mx-auto px-4 py-5 flex flex-wrap items-center justify-between gap-4">
         {/* Copyright */}
         <div className="flex items-center gap-2 text-sm" style={{ color: "var(--text-subtle)" }}>
           <span>© {new Date().getFullYear()}</span>
-          <a
-            href="https://github.com/sejtam-dev"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-medium hover:text-violet-500 transition-colors"
-            style={{ color: "var(--text-muted)" }}
-          >
+          <a href="https://github.com/sejtam-dev" target="_blank" rel="noopener noreferrer" className="font-medium hover:text-violet-500 transition-colors" style={{ color: "var(--text-muted)" }}>
             @Sejtam_
           </a>
           <span>·</span>
-          <a
-            href="https://buffons-needle.sejtam.eu/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-violet-500 transition-colors"
-          >
-            buffons-needle.sejtam.eu
+          <a href="https://buffons-needle.vercel.app" target="_blank" rel="noopener noreferrer" className="hover:text-violet-500 transition-colors">
+            buffons-needle.vercel.app
           </a>
         </div>
 
         {/* GitHub buttons */}
         <div className="flex items-center gap-2">
-          {/* Repo link */}
-          <a
-            href={REPO}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors hover:border-violet-500 hover:text-violet-500"
-            style={{ borderColor: "var(--border)", color: "var(--text-muted)", background: "var(--bg-panel-alt)" }}
-          >
+          <a href={REPO} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors hover:border-violet-500 hover:text-violet-500" style={{ borderColor: "var(--border)", color: "var(--text-muted)", background: "var(--bg-panel-alt)" }}>
             <GitHubIcon />
             <span>GitHub</span>
           </a>
-
-          {/* Star */}
-          <a
-            href={`${REPO}/stargazers`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors hover:border-amber-400 hover:text-amber-400"
-            style={{ borderColor: "var(--border)", color: "var(--text-muted)", background: "var(--bg-panel-alt)" }}
-            title={t.footerStar}
-          >
+          <a href={`${REPO}/stargazers`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors hover:border-amber-400 hover:text-amber-400" style={{ borderColor: "var(--border)", color: "var(--text-muted)", background: "var(--bg-panel-alt)" }} title={t("footerStar")}>
             <StarIcon />
-            <span>{t.footerStar}</span>
+            <span>{t("footerStar")}</span>
           </a>
-
-          {/* Fork */}
-          <a
-            href={`${REPO}/fork`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors hover:border-violet-500 hover:text-violet-500"
-            style={{ borderColor: "var(--border)", color: "var(--text-muted)", background: "var(--bg-panel-alt)" }}
-            title={t.footerFork}
-          >
+          <a href={`${REPO}/fork`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors hover:border-violet-500 hover:text-violet-500" style={{ borderColor: "var(--border)", color: "var(--text-muted)", background: "var(--bg-panel-alt)" }} title={t("footerFork")}>
             <ForkIcon />
-            <span>{t.footerFork}</span>
+            <span>{t("footerFork")}</span>
           </a>
         </div>
       </div>

@@ -1,33 +1,30 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { translations, LOCALES } from "./translations";
-import type { LocaleCode, Translations } from "./translations";
+import { useTranslations, useLocale as useNextIntlLocale } from "next-intl";
+import { useState, useTransition } from "react";
+import { LOCALES, locales } from "./locales";
+import type { LocaleCode } from "./locales";
 
-export type { LocaleCode, Translations };
-export { LOCALES };
-
-/** Maps a BCP-47 language tag to a supported LocaleCode (falls back to "en"). */
-function detectLocale(): LocaleCode {
-  if (typeof navigator === "undefined") return "en";
-  const lang = navigator.language?.toLowerCase() ?? "";
-  if (lang.startsWith("cs") || lang.startsWith("sk")) return "cs";
-  if (lang.startsWith("de")) return "de";
-  if (lang.startsWith("fr")) return "fr";
-  return "en";
-}
+export type { LocaleCode };
+export { LOCALES, locales };
 
 /**
- * Simple client-side locale hook with automatic browser language detection.
+ * Client-side locale hook.
+ * Switching locale writes a cookie and reloads so the server re-renders in the new language.
  */
 export function useLocale() {
-  const [locale, setLocale] = useState<LocaleCode>(detectLocale);
+  const currentLocale = useNextIntlLocale() as LocaleCode;
+  const [locale, setLocale] = useState<LocaleCode>(currentLocale);
+  const t = useTranslations();
+  const [, startTransition] = useTransition();
 
-  const t: Translations = translations[locale];
-
-  const changeLocale = useCallback((code: LocaleCode) => {
+  function changeLocale(code: LocaleCode) {
+    document.cookie = `locale=${code};path=/;max-age=31536000`;
     setLocale(code);
-  }, []);
+    startTransition(() => {
+      window.location.reload();
+    });
+  }
 
   return { locale, t, changeLocale };
 }

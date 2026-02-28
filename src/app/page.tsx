@@ -9,6 +9,7 @@ import Footer from "@/components/Footer";
 import { useSimulation } from "@/hooks/useSimulation";
 import { useLocale } from "@/i18n/useLocale";
 import { useTheme } from "@/context/ThemeContext";
+import { useTranslations } from "next-intl";
 
 const CANVAS_HEIGHT = 520;
 
@@ -19,7 +20,8 @@ export default function HomePage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [canvasWidth, setCanvasWidth] = useState(700);
   const [infoOpen, setInfoOpen] = useState(false);
-  const { locale, t, changeLocale } = useLocale();
+  const { locale, changeLocale } = useLocale();
+  const t = useTranslations();
   const { theme, toggle: toggleTheme } = useTheme();
 
   // Measure the canvas container to make it fully responsive
@@ -49,14 +51,14 @@ export default function HomePage() {
             π
           </div>
           <div className="flex-1 min-w-0">
-            <h1 className="text-lg font-bold tracking-tight leading-tight">{t.appTitle}</h1>
-            <p className="text-xs leading-tight" style={{ color: "var(--text-subtle)" }}>{t.appSubtitle}</p>
+            <h1 className="text-lg font-bold tracking-tight leading-tight">{t("appTitle")}</h1>
+            <p className="text-xs leading-tight" style={{ color: "var(--text-subtle)" }}>{t("appSubtitle")}</p>
           </div>
 
           {/* Info button */}
           <button
             onClick={() => setInfoOpen(true)}
-            title={t.panelHowItWorks}
+            title={t("panelHowItWorks")}
             className="w-8 h-8 flex items-center justify-center rounded-full border text-sm font-bold transition-colors hover:border-violet-500 hover:text-violet-500 shrink-0"
             style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
           >
@@ -97,7 +99,7 @@ export default function HomePage() {
                 </span>
               </>
             ) : (
-              <span className="text-sm" style={{ color: "var(--text-subtle)" }}>{t.dropHint}</span>
+              <span className="text-sm" style={{ color: "var(--text-subtle)" }}>{t("dropHint")}</span>
             )}
           </div>
 
@@ -122,14 +124,14 @@ export default function HomePage() {
           <div className="flex gap-6 text-xs" style={{ color: "var(--text-subtle)" }}>
             <span className="flex items-center gap-2">
               <span className="inline-block w-5 h-0.5 bg-red-500 rounded" />
-              {t.legendCrossing}
+              {t("legendCrossing")}
             </span>
             <span className="flex items-center gap-2">
               <span className="inline-block w-5 h-0.5 bg-blue-500 rounded" />
-              {t.legendNotCrossing}
+              {t("legendNotCrossing")}
             </span>
             <span className="flex items-center gap-2" style={{ color: "var(--text-subtle)" }}>
-              {t.clickToDropHint}
+              {t("clickToDropHint")}
             </span>
           </div>
         </div>
@@ -140,7 +142,6 @@ export default function HomePage() {
             config={config}
             stats={stats}
             isRunning={isRunning}
-            t={t}
             onConfigChange={setConfig}
             onStart={start}
             onPause={pause}
@@ -151,9 +152,9 @@ export default function HomePage() {
       </div>
 
       {/* Info modal — rendered via portal */}
-      {infoOpen && <InfoModal t={t} onClose={() => setInfoOpen(false)} />}
+      {infoOpen && <InfoModal onClose={() => setInfoOpen(false)} />}
 
-      <Footer t={t} />
+      <Footer />
     </main>
   );
 }

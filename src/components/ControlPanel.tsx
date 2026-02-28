@@ -2,14 +2,15 @@
 
 import React, { useState } from "react";
 import type { SimulationConfig, SimulationStats } from "@/types/simulation";
-import type { Translations } from "@/i18n/useLocale";
+import { useTranslations } from "next-intl";
 import { speedToFrameInterval } from "@/hooks/useSimulation";
+
+type T = ReturnType<typeof useTranslations>;
 
 interface SidebarPanelProps {
   config: SimulationConfig;
   stats: SimulationStats;
   isRunning: boolean;
-  t: Translations;
   onConfigChange: (cfg: SimulationConfig) => void;
   onStart: () => void;
   onPause: () => void;
@@ -66,9 +67,9 @@ function speedToSlider(speed: number): number {
   return 50 + ((speed - SPEED_SLOW_MAX) / (SPEED_FAST_MAX - SPEED_SLOW_MAX)) * 50;
 }
 
-function formatSpeedDesc(speed: number, t: Translations): string {
-  if (speed >= 1) return `${Math.floor(speed)} ${t.descSpeed}`;
-  return t.descSpeedSlow.replace("{n}", String(speedToFrameInterval(speed)));
+function formatSpeedDesc(speed: number, t: T): string {
+  if (speed >= 1) return `${Math.floor(speed)} ${t("descSpeed")}`;
+  return t("descSpeedSlow", { n: speedToFrameInterval(speed) });
 }
 
 // ─── Stat row ────────────────────────────────────────────────────────────────
@@ -86,35 +87,32 @@ function StatRow({ label, value, highlight = false }: { label: string; value: st
 
 // ─── Action buttons (shared between tabs) ────────────────────────────────────
 
-function ActionButtons({ isRunning, t, onStart, onPause, onReset, onDropOne }: {
+function ActionButtons({ isRunning, onStart, onPause, onReset, onDropOne }: {
   isRunning: boolean;
-  t: Translations;
   onStart: () => void;
   onPause: () => void;
   onReset: () => void;
   onDropOne: () => void;
 }) {
+  const t = useTranslations();
   return (
     <div className="pt-2 space-y-2 border-t" style={{ borderColor: "var(--border)" }}>
       <div className="flex gap-2">
         {!isRunning ? (
           <button onClick={onStart} className="flex-1 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold transition-colors">
-            {t.btnStart}
+            {t("btnStart")}
           </button>
         ) : (
           <button onClick={onPause} className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-white text-sm font-semibold transition-colors">
-            {t.btnPause}
+            {t("btnPause")}
           </button>
         )}
         <button onClick={onReset} className="py-2.5 px-4 rounded-xl text-sm font-semibold transition-colors" style={{ background: "var(--bg-panel-alt)", color: "var(--text-muted)" }}>
-          {t.btnReset}
+          {t("btnReset")}
         </button>
       </div>
-      <button
-        onClick={onDropOne}
-        className="w-full py-2.5 rounded-xl border border-violet-500/40 hover:border-violet-400 hover:bg-violet-500/10 text-violet-500 text-sm font-semibold transition-colors"
-      >
-        {t.btnDropOne}
+      <button onClick={onDropOne} className="w-full py-2.5 rounded-xl border border-violet-500/40 hover:border-violet-400 hover:bg-violet-500/10 text-violet-500 text-sm font-semibold transition-colors">
+        {t("btnDropOne")}
       </button>
     </div>
   );
@@ -125,7 +123,8 @@ function ActionButtons({ isRunning, t, onStart, onPause, onReset, onDropOne }: {
 /**
  * Unified sidebar panel with Parameters / Statistics tabs and shared action buttons.
  */
-export default function SidebarPanel({ config, stats, isRunning, t, onConfigChange, onStart, onPause, onReset, onDropOne }: SidebarPanelProps) {
+export default function SidebarPanel({ config, stats, isRunning, onConfigChange, onStart, onPause, onReset, onDropOne }: SidebarPanelProps) {
+  const t = useTranslations();
   const [tab, setTab] = useState<"params" | "stats">("params");
 
   // Derive slider position from config.speed — no local state needed
@@ -158,7 +157,7 @@ export default function SidebarPanel({ config, stats, isRunning, t, onConfigChan
             className={`flex-1 py-3 text-sm font-semibold transition-colors ${tab === id ? "text-violet-500 border-b-2 border-violet-500" : ""}`}
             style={tab !== id ? { color: "var(--text-muted)" } : {}}
           >
-            {id === "params" ? t.panelParameters : t.panelStats}
+            {id === "params" ? t("panelParameters") : t("panelStats")}
           </button>
         ))}
       </div>
@@ -167,20 +166,20 @@ export default function SidebarPanel({ config, stats, isRunning, t, onConfigChan
       <div className="p-5 flex-1 space-y-5">
         {tab === "params" && (
           <>
-            <p className="text-xs" style={{ color: "var(--text-subtle)" }}>{t.panelNeedleConstraint}</p>
+            <p className="text-xs" style={{ color: "var(--text-subtle)" }}>{t("panelNeedleConstraint")}</p>
             <SliderField
-              label={t.labelNeedleLength} value={config.needleLength} min={10} max={config.lineSpacing} step={1}
-              displayValue={`${config.needleLength} px`} description={t.descNeedleLength}
+              label={t("labelNeedleLength")} value={config.needleLength} min={10} max={config.lineSpacing} step={1}
+              displayValue={`${config.needleLength} px`} description={t("descNeedleLength")}
               onChange={(v) => update({ needleLength: v })} disabled={isRunning}
             />
             <SliderField
-              label={t.labelLineSpacing} value={config.lineSpacing} min={30} max={200} step={5}
-              displayValue={`${config.lineSpacing} px`} description={t.descLineSpacing}
+              label={t("labelLineSpacing")} value={config.lineSpacing} min={30} max={200} step={5}
+              displayValue={`${config.lineSpacing} px`} description={t("descLineSpacing")}
               onChange={(v) => update({ lineSpacing: v, needleLength: Math.min(config.needleLength, v) })} disabled={isRunning}
             />
             <SliderField
-              label={t.labelMaxNeedles} value={config.maxNeedles} min={100} max={50000} step={100}
-              displayValue={config.maxNeedles.toLocaleString()} description={t.descMaxNeedles}
+              label={t("labelMaxNeedles")} value={config.maxNeedles} min={100} max={50000} step={100}
+              displayValue={config.maxNeedles.toLocaleString()} description={t("descMaxNeedles")}
               onChange={(v) => update({ maxNeedles: v })} disabled={isRunning}
             />
           </>
@@ -188,13 +187,13 @@ export default function SidebarPanel({ config, stats, isRunning, t, onConfigChan
 
         {tab === "stats" && (
           <>
-            <StatRow label={t.statNeedlesDropped} value={total.toLocaleString()} />
-            <StatRow label={t.statCrossingLines} value={crossings.toLocaleString()} />
-            <StatRow label={t.statCrossingRatio} value={crossingPct} />
-            <StatRow label={t.statPiReal} value={Math.PI.toFixed(6)} />
-            <StatRow label={t.statPiEstimated} value={piDisplay} highlight />
-            <StatRow label={t.statAbsError} value={errorDisplay} />
-            <StatRow label={t.statRelError} value={errorPct} />
+            <StatRow label={t("statNeedlesDropped")} value={total.toLocaleString()} />
+            <StatRow label={t("statCrossingLines")} value={crossings.toLocaleString()} />
+            <StatRow label={t("statCrossingRatio")} value={crossingPct} />
+            <StatRow label={t("statPiReal")} value={Math.PI.toFixed(6)} />
+            <StatRow label={t("statPiEstimated")} value={piDisplay} highlight />
+            <StatRow label={t("statAbsError")} value={errorDisplay} />
+            <StatRow label={t("statRelError")} value={errorPct} />
           </>
         )}
       </div>
@@ -202,7 +201,7 @@ export default function SidebarPanel({ config, stats, isRunning, t, onConfigChan
       {/* Speed slider — shared, always visible */}
       <div className="px-5 pb-3 space-y-1.5 border-t" style={{ borderColor: "var(--border)" }}>
         <div className="flex justify-between items-baseline pt-3">
-          <label className="text-sm font-medium" style={{ color: "var(--text-muted)" }}>{t.labelSpeed}</label>
+          <label className="text-sm font-medium" style={{ color: "var(--text-muted)" }}>{t("labelSpeed")}</label>
           <span className="text-sm font-mono font-semibold text-violet-500">{speedLabel}</span>
         </div>
         <input
@@ -216,7 +215,7 @@ export default function SidebarPanel({ config, stats, isRunning, t, onConfigChan
 
       {/* Action buttons — always visible */}
       <div className="px-5 pb-5">
-        <ActionButtons isRunning={isRunning} t={t} onStart={onStart} onPause={onPause} onReset={onReset} onDropOne={onDropOne} />
+        <ActionButtons isRunning={isRunning} onStart={onStart} onPause={onPause} onReset={onReset} onDropOne={onDropOne} />
       </div>
     </div>
   );
