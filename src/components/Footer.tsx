@@ -51,7 +51,7 @@ export default function Footer() {
 
   return (
     <footer className="mt-auto border-t" style={{ borderColor: "var(--border)" }}>
-      <div className="max-w-7xl mx-auto px-4 py-5 flex flex-wrap items-center justify-between gap-4">
+      <div className="max-w-7xl mx-auto px-4 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         {/* Copyright */}
         <div className="flex items-center gap-2 text-sm" style={{ color: "var(--text-subtle)" }}>
           <span>© {new Date().getFullYear()}</span>
@@ -65,7 +65,7 @@ export default function Footer() {
         </div>
 
         {/* GitHub buttons */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <a href={REPO} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors hover:border-violet-500 hover:text-violet-500" style={{ borderColor: "var(--border)", color: "var(--text-muted)", background: "var(--bg-panel-alt)" }}>
             <GitHubIcon />
             <span>GitHub</span>

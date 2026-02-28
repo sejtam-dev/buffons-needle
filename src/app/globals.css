@@ -48,6 +48,7 @@ body {
     color: var(--text-primary);
     font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
     transition: background 0.2s, color 0.2s;
+    overflow-x: hidden;
 }
 
 /* Range input thumb — cross-browser */
