@@ -59,8 +59,8 @@ export default function Footer() {
             @Sejtam_
           </a>
           <span>·</span>
-          <a href="https://buffons-needle.vercel.app" target="_blank" rel="noopener noreferrer" className="hover:text-violet-500 transition-colors">
-            buffons-needle.vercel.app
+          <a href="https://buffons-needle.sejtam.eu" target="_blank" rel="noopener noreferrer" className="hover:text-violet-500 transition-colors">
+            buffons-needle.sejtam.eu
           </a>
         </div>
 
