@@ -71,7 +71,7 @@ export default function InfoModal({ onClose }: InfoModalProps) {
             <Math block math={String.raw`y_c \bmod d \;\leq\; \frac{l}{2} \left|\sin\theta\right|`} />
           </div>
           <p className="text-xs" style={{ color: "var(--text-subtle)" }}>
-            where <Math math="y_c \in [0,\, d)" />, <Math math="\theta \in [0,\, \pi)" />
+            <Math math="y_c \in [0,\, d)" />, <Math math="\theta \in [0,\, \pi)" />
           </p>
 
           <SectionTitle><MathText text={t("infoProbTitle")} /></SectionTitle>
