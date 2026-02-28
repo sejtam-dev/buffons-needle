@@ -50,7 +50,7 @@ export default function Footer() {
   }, []);
 
   return (
-    <footer className="border-t mt-8" style={{ borderColor: "var(--border)" }}>
+    <footer className="mt-auto border-t" style={{ borderColor: "var(--border)" }}>
       <div className="max-w-7xl mx-auto px-4 py-5 flex flex-wrap items-center justify-between gap-4">
         {/* Copyright */}
         <div className="flex items-center gap-2 text-sm" style={{ color: "var(--text-subtle)" }}>

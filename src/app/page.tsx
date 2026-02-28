@@ -44,7 +44,7 @@ export default function HomePage() {
   const isDark = theme === "dark";
 
   return (
-    <main className="min-h-screen font-sans transition-colors" style={{ background: "var(--bg-base)", color: "var(--text-primary)" }}>
+    <main className="min-h-screen flex flex-col font-sans transition-colors" style={{ background: "var(--bg-base)", color: "var(--text-primary)" }}>
       {/* Header */}
       <header className="border-b px-6 py-4" style={{ borderColor: "var(--border)", background: "var(--bg-panel)" }}>
         <div className="max-w-7xl mx-auto flex items-center gap-3">
