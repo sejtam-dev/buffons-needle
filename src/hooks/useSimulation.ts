@@ -3,6 +3,11 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import type { Needle, SimulationConfig, SimulationStats, PiDataPoint } from "@/types/simulation";
 import type { NeedleCanvasHandle } from "@/components/NeedleCanvas";
+import type {
+  WorkerInMessage,
+  WorkerOutMessage,
+  WorkerConfigMessage,
+} from "@/workers/simulation.worker";
 
 export const DEFAULT_CONFIG: SimulationConfig = {
   needleLength: 50,
@@ -35,26 +40,6 @@ interface UseSimulationReturn {
   dropAtPosition: (cx: number, cy: number) => void;
 }
 
-/**
- * Determines whether a needle crosses one of the parallel horizontal lines.
- */
-function checkCrossing(cy: number, angle: number, l: number, d: number): boolean {
-  const halfProjection = (l / 2) * Math.abs(Math.sin(angle));
-  const distToNearestLine = cy % d;
-  return distToNearestLine <= halfProjection || (d - distToNearestLine) <= halfProjection;
-}
-
-function generateNeedle(w: number, h: number, l: number, d: number): Needle {
-  const cx = Math.random() * w;
-  const cy = Math.random() * h;
-  const angle = Math.random() * Math.PI;
-  return { cx, cy, angle, crossing: checkCrossing(cy, angle, l, d) };
-}
-
-function estimatePi(total: number, crossings: number, l: number, d: number): number {
-  return (2 * l * total) / (d * crossings);
-}
-
 /** Minimum ms between React state flushes during animation (throttle). */
 const STATE_FLUSH_INTERVAL_MS = 80;
 
@@ -65,7 +50,6 @@ export function useSimulation(canvasWidth: number, canvasHeight: number): UseSim
   const [config, setConfigState] = useState<SimulationConfig>(DEFAULT_CONFIG);
   const [isRunning, setIsRunning] = useState(false);
 
-  // Canvas imperative handle — set by page via ref
   const canvasRef = useRef<NeedleCanvasHandle | null>(null);
 
   const rafRef = useRef<number | null>(null);
@@ -77,11 +61,87 @@ export function useSimulation(canvasWidth: number, canvasHeight: number): UseSim
   const canvasWidthRef = useRef(canvasWidth);
   const canvasHeightRef = useRef(canvasHeight);
   const frameCounterRef = useRef(0);
-  /** Timestamp of last React state flush — used for throttling. */
   const lastFlushRef = useRef(0);
 
-  useEffect(() => { canvasWidthRef.current = canvasWidth; canvasHeightRef.current = canvasHeight; }, [canvasWidth, canvasHeight]);
+  // ── Web Worker ────────────────────────────────────────────────────────────
+  const workerRef = useRef<Worker | null>(null);
+
+  // Pending promise resolver — main thread sends one batch request per frame
+  // and waits for the worker to respond before scheduling the next frame.
+  const pendingResolveRef = useRef<((needles: Needle[]) => void) | null>(null);
+
+  useEffect(() => {
+    const worker = new Worker(
+      new URL("../workers/simulation.worker.ts", import.meta.url),
+      { type: "module" }
+    );
+
+    worker.onmessage = (e: MessageEvent<WorkerOutMessage>) => {
+      const msg = e.data;
+      if (msg.type !== "batch") return;
+
+      // Append to local needle array ref (for full redraws / reset)
+      const incoming = msg.needles as Needle[];
+      needlesRef.current = needlesRef.current.concat(incoming);
+      statsRef.current = msg.stats;
+
+      if (msg.historyPoint) {
+        piHistoryRef.current = [...piHistoryRef.current, msg.historyPoint];
+      }
+
+      // Draw on canvas immediately (no React re-render needed)
+      canvasRef.current?.appendNeedles(incoming);
+
+      // Throttle React state flushes
+      const now = performance.now();
+      if (now - lastFlushRef.current >= STATE_FLUSH_INTERVAL_MS) {
+        lastFlushRef.current = now;
+        setNeedles([...needlesRef.current]);
+        setStats({ ...statsRef.current });
+        setPiHistory(piHistoryRef.current);
+      }
+
+      // Resolve the per-frame promise so the RAF loop can continue
+      pendingResolveRef.current?.(incoming);
+      pendingResolveRef.current = null;
+    };
+
+    workerRef.current = worker;
+
+    return () => {
+      worker.terminate();
+      workerRef.current = null;
+    };
+  }, []);
+
+  // Keep worker in sync with canvas dimensions
+  useEffect(() => {
+    canvasWidthRef.current = canvasWidth;
+    canvasHeightRef.current = canvasHeight;
+    postConfigure(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canvasWidth, canvasHeight]);
+
   useEffect(() => { configRef.current = config; }, [config]);
+
+  // ── helpers ───────────────────────────────────────────────────────────────
+
+  function postMessage(msg: WorkerInMessage) {
+    workerRef.current?.postMessage(msg);
+  }
+
+  function postConfigure(reset: boolean) {
+    const cfg = configRef.current;
+    const msg: WorkerConfigMessage = {
+      type: "configure",
+      width: canvasWidthRef.current,
+      height: canvasHeightRef.current,
+      needleLength: cfg.needleLength,
+      lineSpacing: cfg.lineSpacing,
+      reset,
+    };
+    postMessage(msg);
+  }
 
   // ── animation step ────────────────────────────────────────────────────────
 
@@ -96,9 +156,9 @@ export function useSimulation(canvasWidth: number, canvasHeight: number): UseSim
       if (needlesRef.current.length >= cfg.maxNeedles) {
         isRunningRef.current = false;
         setIsRunning(false);
-        // Final state flush
         setNeedles([...needlesRef.current]);
         setStats({ ...statsRef.current });
+        setPiHistory(piHistoryRef.current);
         return;
       }
 
@@ -115,89 +175,49 @@ export function useSimulation(canvasWidth: number, canvasHeight: number): UseSim
         ? Math.min(Math.floor(cfg.speed), cfg.maxNeedles - needlesRef.current.length)
         : 1;
 
-      const batch: Needle[] = [];
-      for (let i = 0; i < batchSize; i++) {
-        batch.push(generateNeedle(canvasWidthRef.current, canvasHeightRef.current, cfg.needleLength, cfg.lineSpacing));
-      }
-
-      // Draw incrementally on canvas — O(batch) not O(total)
-      canvasRef.current?.appendNeedles(batch);
-
-      // Update internal refs immediately
-      const next = needlesRef.current.concat(batch);
-      needlesRef.current = next;
-      const newCrossings = statsRef.current.crossings + batch.filter((n) => n.crossing).length;
-      const piEst = newCrossings > 0 ? estimatePi(next.length, newCrossings, cfg.needleLength, cfg.lineSpacing) : null;
-      statsRef.current = {
-        total: next.length,
-        crossings: newCrossings,
-        piEstimate: piEst,
-        error: piEst !== null ? Math.abs(piEst - Math.PI) : null,
-      };
-
-      // Record a history point every ~50 needles
-      if (piEst !== null) {
-        const lastPoint = piHistoryRef.current[piHistoryRef.current.length - 1];
-        if (!lastPoint || next.length - lastPoint.total >= 50) {
-          piHistoryRef.current = [...piHistoryRef.current, { total: next.length, piEstimate: piEst }];
+      // Ask worker to generate the batch; schedule next frame after response arrives
+      new Promise<Needle[]>((resolve) => {
+        pendingResolveRef.current = resolve;
+        postMessage({ type: "batch", size: batchSize });
+      }).then(() => {
+        if (isRunningRef.current) {
+          rafRef.current = requestAnimationFrame(() => stepRef.current());
         }
-      }
-
-      // Throttle React state updates so re-renders don't saturate the main thread
-      const now = performance.now();
-      if (now - lastFlushRef.current >= STATE_FLUSH_INTERVAL_MS) {
-        lastFlushRef.current = now;
-        setNeedles([...needlesRef.current]);
-        setStats({ ...statsRef.current });
-        setPiHistory(piHistoryRef.current);
-      }
-
-      rafRef.current = requestAnimationFrame(() => stepRef.current());
+      });
     };
   });
 
-  // ── shared batch applier (used by manual drops) ───────────────────────────
+  // ── shared applier for manual drops ──────────────────────────────────────
 
-  function applyBatch(batch: Needle[]) {
-    canvasRef.current?.appendNeedles(batch);
-    const next = needlesRef.current.concat(batch);
-    needlesRef.current = next;
-    const newCrossings = statsRef.current.crossings + batch.filter((n) => n.crossing).length;
-    const cfg = configRef.current;
-    const piEst = newCrossings > 0 ? estimatePi(next.length, newCrossings, cfg.needleLength, cfg.lineSpacing) : null;
-    const newStats: SimulationStats = {
-      total: next.length,
-      crossings: newCrossings,
-      piEstimate: piEst,
-      error: piEst !== null ? Math.abs(piEst - Math.PI) : null,
-    };
-    statsRef.current = newStats;
-    // Record history point on every manual drop
-    if (piEst !== null) {
-      piHistoryRef.current = [...piHistoryRef.current, { total: next.length, piEstimate: piEst }];
-    }
-    // Manual drops always flush immediately
-    setNeedles([...next]);
-    setStats(newStats);
-    setPiHistory(piHistoryRef.current);
+  function applyDrop(cx: number, cy: number) {
+    new Promise<Needle[]>((resolve) => {
+      pendingResolveRef.current = resolve;
+      postMessage({ type: "drop", cx, cy });
+    }).then(() => {
+      setNeedles([...needlesRef.current]);
+      setStats({ ...statsRef.current });
+      setPiHistory(piHistoryRef.current);
+    });
   }
 
   // ── controls ──────────────────────────────────────────────────────────────
 
   const start = useCallback(() => {
     if (isRunningRef.current) return;
+    postConfigure(false);
     frameCounterRef.current = 0;
     lastFlushRef.current = 0;
     isRunningRef.current = true;
     setIsRunning(true);
     rafRef.current = requestAnimationFrame(() => stepRef.current());
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const pause = useCallback(() => {
     isRunningRef.current = false;
     setIsRunning(false);
     if (rafRef.current !== null) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
-    // Flush final state on pause
+    pendingResolveRef.current = null;
     setNeedles([...needlesRef.current]);
     setStats({ ...statsRef.current });
     setPiHistory(piHistoryRef.current);
@@ -207,6 +227,7 @@ export function useSimulation(canvasWidth: number, canvasHeight: number): UseSim
     isRunningRef.current = false;
     setIsRunning(false);
     if (rafRef.current !== null) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
+    pendingResolveRef.current = null;
     needlesRef.current = [];
     piHistoryRef.current = [];
     const empty: SimulationStats = { total: 0, crossings: 0, piEstimate: null, error: null };
@@ -214,7 +235,8 @@ export function useSimulation(canvasWidth: number, canvasHeight: number): UseSim
     setNeedles([]);
     setStats(empty);
     setPiHistory([]);
-    // fullRedraw will be triggered by needles prop change in NeedleCanvas
+    postConfigure(true);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const setConfig = useCallback((cfg: SimulationConfig) => {
@@ -228,6 +250,7 @@ export function useSimulation(canvasWidth: number, canvasHeight: number): UseSim
       setIsRunning(false);
       frameCounterRef.current = 0;
       if (rafRef.current !== null) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
+      pendingResolveRef.current = null;
       needlesRef.current = [];
       piHistoryRef.current = [];
       const empty: SimulationStats = { total: 0, crossings: 0, piEstimate: null, error: null };
@@ -235,20 +258,29 @@ export function useSimulation(canvasWidth: number, canvasHeight: number): UseSim
       setNeedles([]);
       setStats(empty);
       setPiHistory([]);
+      // postConfigure after configRef update propagates via useEffect
+      setTimeout(() => postConfigure(true), 0);
+    } else {
+      // Speed / maxNeedles change — just update worker dimensions in case
+      postConfigure(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const dropOne = useCallback(() => {
     const cfg = configRef.current;
     if (needlesRef.current.length >= cfg.maxNeedles) return;
-    applyBatch([generateNeedle(canvasWidthRef.current, canvasHeightRef.current, cfg.needleLength, cfg.lineSpacing)]);
+    const w = canvasWidthRef.current;
+    const h = canvasHeightRef.current;
+    applyDrop(Math.random() * w, Math.random() * h);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const dropAtPosition = useCallback((cx: number, cy: number) => {
     const cfg = configRef.current;
     if (needlesRef.current.length >= cfg.maxNeedles) return;
-    const angle = Math.random() * Math.PI;
-    applyBatch([{ cx, cy, angle, crossing: checkCrossing(cy, angle, cfg.needleLength, cfg.lineSpacing) }]);
+    applyDrop(cx, cy);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
