@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import type { Needle, SimulationConfig, SimulationStats } from "@/types/simulation";
+import type { Needle, SimulationConfig, SimulationStats, PiDataPoint } from "@/types/simulation";
 import type { NeedleCanvasHandle } from "@/components/NeedleCanvas";
 
 export const DEFAULT_CONFIG: SimulationConfig = {
@@ -23,6 +23,7 @@ export function speedToFrameInterval(speed: number): number {
 interface UseSimulationReturn {
   needles: Needle[];
   stats: SimulationStats;
+  piHistory: PiDataPoint[];
   config: SimulationConfig;
   isRunning: boolean;
   canvasRef: React.RefObject<NeedleCanvasHandle | null>;
@@ -60,6 +61,7 @@ const STATE_FLUSH_INTERVAL_MS = 80;
 export function useSimulation(canvasWidth: number, canvasHeight: number): UseSimulationReturn {
   const [needles, setNeedles] = useState<Needle[]>([]);
   const [stats, setStats] = useState<SimulationStats>({ total: 0, crossings: 0, piEstimate: null, error: null });
+  const [piHistory, setPiHistory] = useState<PiDataPoint[]>([]);
   const [config, setConfigState] = useState<SimulationConfig>(DEFAULT_CONFIG);
   const [isRunning, setIsRunning] = useState(false);
 
@@ -70,6 +72,7 @@ export function useSimulation(canvasWidth: number, canvasHeight: number): UseSim
   const isRunningRef = useRef(false);
   const needlesRef = useRef<Needle[]>([]);
   const statsRef = useRef<SimulationStats>({ total: 0, crossings: 0, piEstimate: null, error: null });
+  const piHistoryRef = useRef<PiDataPoint[]>([]);
   const configRef = useRef<SimulationConfig>(DEFAULT_CONFIG);
   const canvasWidthRef = useRef(canvasWidth);
   const canvasHeightRef = useRef(canvasHeight);
@@ -132,12 +135,21 @@ export function useSimulation(canvasWidth: number, canvasHeight: number): UseSim
         error: piEst !== null ? Math.abs(piEst - Math.PI) : null,
       };
 
+      // Record a history point every ~50 needles
+      if (piEst !== null) {
+        const lastPoint = piHistoryRef.current[piHistoryRef.current.length - 1];
+        if (!lastPoint || next.length - lastPoint.total >= 50) {
+          piHistoryRef.current = [...piHistoryRef.current, { total: next.length, piEstimate: piEst }];
+        }
+      }
+
       // Throttle React state updates so re-renders don't saturate the main thread
       const now = performance.now();
       if (now - lastFlushRef.current >= STATE_FLUSH_INTERVAL_MS) {
         lastFlushRef.current = now;
         setNeedles([...needlesRef.current]);
         setStats({ ...statsRef.current });
+        setPiHistory(piHistoryRef.current);
       }
 
       rafRef.current = requestAnimationFrame(() => stepRef.current());
@@ -160,9 +172,14 @@ export function useSimulation(canvasWidth: number, canvasHeight: number): UseSim
       error: piEst !== null ? Math.abs(piEst - Math.PI) : null,
     };
     statsRef.current = newStats;
+    // Record history point on every manual drop
+    if (piEst !== null) {
+      piHistoryRef.current = [...piHistoryRef.current, { total: next.length, piEstimate: piEst }];
+    }
     // Manual drops always flush immediately
     setNeedles([...next]);
     setStats(newStats);
+    setPiHistory(piHistoryRef.current);
   }
 
   // ── controls ──────────────────────────────────────────────────────────────
@@ -183,6 +200,7 @@ export function useSimulation(canvasWidth: number, canvasHeight: number): UseSim
     // Flush final state on pause
     setNeedles([...needlesRef.current]);
     setStats({ ...statsRef.current });
+    setPiHistory(piHistoryRef.current);
   }, []);
 
   const reset = useCallback(() => {
@@ -190,10 +208,12 @@ export function useSimulation(canvasWidth: number, canvasHeight: number): UseSim
     setIsRunning(false);
     if (rafRef.current !== null) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
     needlesRef.current = [];
+    piHistoryRef.current = [];
     const empty: SimulationStats = { total: 0, crossings: 0, piEstimate: null, error: null };
     statsRef.current = empty;
     setNeedles([]);
     setStats(empty);
+    setPiHistory([]);
     // fullRedraw will be triggered by needles prop change in NeedleCanvas
   }, []);
 
@@ -209,10 +229,12 @@ export function useSimulation(canvasWidth: number, canvasHeight: number): UseSim
       frameCounterRef.current = 0;
       if (rafRef.current !== null) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
       needlesRef.current = [];
+      piHistoryRef.current = [];
       const empty: SimulationStats = { total: 0, crossings: 0, piEstimate: null, error: null };
       statsRef.current = empty;
       setNeedles([]);
       setStats(empty);
+      setPiHistory([]);
     }
   }, []);
 
@@ -233,5 +255,5 @@ export function useSimulation(canvasWidth: number, canvasHeight: number): UseSim
     return () => { if (rafRef.current !== null) cancelAnimationFrame(rafRef.current); };
   }, []);
 
-  return { needles, stats, config, isRunning, canvasRef, setConfig, start, pause, reset, dropOne, dropAtPosition };
+  return { needles, stats, piHistory, config, isRunning, canvasRef, setConfig, start, pause, reset, dropOne, dropAtPosition };
 }

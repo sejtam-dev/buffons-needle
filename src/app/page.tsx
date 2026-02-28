@@ -6,6 +6,7 @@ import SidebarPanel from "@/components/ControlPanel";
 import InfoModal from "@/components/InfoPanel";
 import LocaleSwitcher from "@/components/LocaleSwitcher";
 import Footer from "@/components/Footer";
+import PiChart from "@/components/PiChart";
 import { useSimulation } from "@/hooks/useSimulation";
 import { useLocale, LOCALES } from "@/i18n/useLocale";
 import { useTheme } from "@/context/ThemeContext";
@@ -51,7 +52,7 @@ export default function HomePage() {
     return () => document.removeEventListener("click", handleClick);
   }, [menuOpen]);
 
-  const { needles, stats, config, isRunning, canvasRef, setConfig, start, pause, reset, dropOne, dropAtPosition } =
+  const { needles, stats, piHistory, config, isRunning, canvasRef, setConfig, start, pause, reset, dropOne, dropAtPosition } =
     useSimulation(canvasWidth, canvasHeight);
 
   const isDark = theme === "dark";
@@ -206,6 +207,9 @@ export default function HomePage() {
               {t("clickToDropHint")}
             </span>
           </div>
+
+          {/* π convergence chart */}
+          <PiChart history={piHistory} height={200} />
         </div>
 
         {/* Sidebar */}

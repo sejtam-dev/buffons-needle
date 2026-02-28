@@ -43,6 +43,10 @@
   "infoInteract": "Vous pouvez ajuster la longueur de l'aiguille et l'espacement des lignes, contrôler la vitesse de simulation et cliquer n'importe où sur le canvas pour lancer une aiguille à une position précise avec un angle aléatoire.",
   "clickToDropHint": "Cliquez sur le canvas pour lancer une aiguille à cet endroit",
   "footerStar": "Étoile sur GitHub",
-  "footerFork": "Forker"
+  "footerFork": "Forker",
+  "chartPiConvergence": "Convergence de l'estimation de π",
+  "chartNoData": "Lancez des aiguilles pour voir le graphique…",
+  "chartExpand": "Agrandir le graphique",
+  "chartZoomHint": "Faites glisser les poignées en bas pour zoomer sur une partie du graphique."
 }
 

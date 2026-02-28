@@ -43,6 +43,10 @@
   "infoInteract": "You can adjust the needle length and line spacing, control the simulation speed, and click anywhere on the canvas to drop a needle at a specific position with a random angle.",
   "clickToDropHint": "Click on the canvas to drop a needle at that position",
   "footerStar": "Star on GitHub",
-  "footerFork": "Fork"
+  "footerFork": "Fork",
+  "chartPiConvergence": "π estimate convergence",
+  "chartNoData": "Drop some needles to see the chart…",
+  "chartExpand": "Expand chart",
+  "chartZoomHint": "Drag the handles at the bottom to zoom into a region of the chart."
 }
 

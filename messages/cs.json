@@ -43,6 +43,10 @@
   "infoInteract": "Můžete upravit délku jehly a rozestup čar, měnit rychlost simulace a kliknutím na plátno hodit jehlu na konkrétní místo s náhodným úhlem.",
   "clickToDropHint": "Kliknutím na plátno hodíte jehlu na dané místo",
   "footerStar": "Hvězda na GitHubu",
-  "footerFork": "Forkovat"
+  "footerFork": "Forkovat",
+  "chartPiConvergence": "Konvergence odhadu π",
+  "chartNoData": "Pusťte jehly a graf se zobrazí…",
+  "chartExpand": "Rozbalit graf",
+  "chartZoomHint": "Táhněte úchyty dole pro přiblížení části grafu."
 }
 

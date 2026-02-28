@@ -31,6 +31,16 @@ export interface SimulationConfig {
 }
 
 /**
+ * A single data point in the π convergence history.
+ */
+export interface PiDataPoint {
+  /** Total number of needles at this snapshot */
+  total: number;
+  /** π estimate at this snapshot */
+  piEstimate: number;
+}
+
+/**
  * Current runtime state of the simulation.
  */
 export interface SimulationStats {

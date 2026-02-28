@@ -43,5 +43,9 @@
   "infoInteract": "Sie können Nadellänge und Linienabstand anpassen, die Simulationsgeschwindigkeit steuern und durch Klicken auf die Leinwand eine Nadel an einer bestimmten Position mit zufälligem Winkel werfen.",
   "clickToDropHint": "Klicken Sie auf die Leinwand, um eine Nadel an dieser Stelle zu werfen",
   "footerStar": "Stern auf GitHub",
-  "footerFork": "Forken"
+  "footerFork": "Forken",
+  "chartPiConvergence": "Konvergenz der π-Schätzung",
+  "chartNoData": "Werfen Sie Nadeln, um das Diagramm zu sehen…",
+  "chartExpand": "Diagramm vergrößern",
+  "chartZoomHint": "Ziehen Sie die Griffe unten, um in einen Bereich des Diagramms zu zoomen."
 }
