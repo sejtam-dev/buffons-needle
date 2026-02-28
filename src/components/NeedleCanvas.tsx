@@ -44,8 +44,24 @@ const NeedleCanvas = forwardRef<NeedleCanvasHandle, NeedleCanvasProps>(function 
 
   // ── helpers ──────────────────────────────────────────────────────────────
 
+  /** Returns context already scaled for the current devicePixelRatio. */
   function getCtx() {
-    return canvasRef.current?.getContext("2d") ?? null;
+    const canvas = canvasRef.current;
+    if (!canvas) return null;
+    return canvas.getContext("2d") ?? null;
+  }
+
+  /** Scale the canvas backing store to match devicePixelRatio. */
+  function applyDpr() {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(height * dpr);
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
   }
 
   function drawBackground(ctx: CanvasRenderingContext2D) {
@@ -84,6 +100,7 @@ const NeedleCanvas = forwardRef<NeedleCanvasHandle, NeedleCanvasProps>(function 
   // ── full redraw ───────────────────────────────────────────────────────────
 
   const fullRedraw = useCallback(() => {
+    applyDpr();
     const ctx = getCtx();
     if (!ctx) return;
     ctx.clearRect(0, 0, width, height);
@@ -126,19 +143,21 @@ const NeedleCanvas = forwardRef<NeedleCanvasHandle, NeedleCanvasProps>(function 
     const canvas = canvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
-    const scaleX = width / rect.width;
-    const scaleY = height / rect.height;
-    onCanvasClick((e.clientX - rect.left) * scaleX, (e.clientY - rect.top) * scaleY);
+    // coords are in CSS pixels — no DPR correction needed here because
+    // the canvas transform maps CSS px → logical px automatically
+    onCanvasClick(e.clientX - rect.left, e.clientY - rect.top);
   }
 
   return (
     <canvas
       ref={canvasRef}
+      // Physical size is set dynamically via applyDpr(); these attrs are just
+      // initial placeholders — style controls the visible CSS size.
       width={width}
       height={height}
       onClick={handleClick}
       className="rounded-xl cursor-crosshair"
-      style={{ display: "block" }}
+      style={{ display: "block", width, height }}
     />
   );
 });
