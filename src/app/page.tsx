@@ -10,6 +10,7 @@ import { useSimulation } from "@/hooks/useSimulation";
 import { useLocale } from "@/i18n/useLocale";
 import { useTheme } from "@/context/ThemeContext";
 import { useTranslations } from "next-intl";
+import { MathText } from "@/components/Math";
 
 const CANVAS_HEIGHT = 520;
 
@@ -52,7 +53,7 @@ export default function HomePage() {
           </div>
           <div className="flex-1 min-w-0">
             <h1 className="text-lg font-bold tracking-tight leading-tight">{t("appTitle")}</h1>
-            <p className="text-xs leading-tight" style={{ color: "var(--text-subtle)" }}>{t("appSubtitle")}</p>
+            <p className="text-xs leading-tight" style={{ color: "var(--text-subtle)" }}><MathText text={t("appSubtitle")} /></p>
           </div>
 
           {/* Info button */}
@@ -99,7 +100,7 @@ export default function HomePage() {
                 </span>
               </>
             ) : (
-              <span className="text-sm" style={{ color: "var(--text-subtle)" }}>{t("dropHint")}</span>
+              <span className="text-sm" style={{ color: "var(--text-subtle)" }}><MathText text={t("dropHint")} /></span>
             )}
           </div>
 

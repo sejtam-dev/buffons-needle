@@ -1,6 +1,7 @@
 import type {Metadata} from "next";
 import {Geist, Geist_Mono} from "next/font/google";
 import "./globals.css";
+import "katex/dist/katex.min.css";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
@@ -29,7 +30,11 @@ export default async function RootLayout({
     const messages = await getMessages();
 
     return (
-        <html lang={locale} className="dark">
+        <html lang={locale} suppressHydrationWarning>
+        <head>
+          {/* Inline script: sets dark/light class before first paint to avoid flash and hydration mismatch */}
+          <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('theme');document.documentElement.classList.toggle('dark',t!=='light')}catch(e){}})()` }} />
+        </head>
         <body
             className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >

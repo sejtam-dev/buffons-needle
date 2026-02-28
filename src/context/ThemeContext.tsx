@@ -15,9 +15,15 @@ const ThemeContext = createContext<ThemeContextValue>({
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("dark");
+  // Read the theme that the inline script already applied so initial state matches the DOM
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof window !== "undefined") {
+      return document.documentElement.classList.contains("dark") ? "dark" : "light";
+    }
+    return "dark";
+  });
 
-  // Apply theme class to <html> so Tailwind dark: variants work
+  // Keep <html> class and localStorage in sync whenever theme changes
   useEffect(() => {
     const root = document.documentElement;
     if (theme === "dark") {
@@ -25,6 +31,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     } else {
       root.classList.remove("dark");
     }
+    localStorage.setItem("theme", theme);
   }, [theme]);
 
   function toggle() {

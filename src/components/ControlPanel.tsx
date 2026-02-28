@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import type { SimulationConfig, SimulationStats } from "@/types/simulation";
 import { useTranslations } from "next-intl";
+import { MathText } from "@/components/Math";
 import { speedToFrameInterval } from "@/hooks/useSimulation";
 
 type T = ReturnType<typeof useTranslations>;
@@ -77,7 +78,7 @@ function formatSpeedDesc(speed: number, t: T): string {
 function StatRow({ label, value, highlight = false }: { label: string; value: string; highlight?: boolean }) {
   return (
     <div className="flex items-center justify-between py-2.5 border-b last:border-0" style={{ borderColor: "var(--border)" }}>
-      <span className="text-sm" style={{ color: "var(--text-muted)" }}>{label}</span>
+      <span className="text-sm" style={{ color: "var(--text-muted)" }}><MathText text={label} /></span>
       <span className={`text-sm font-mono font-semibold ${highlight ? "text-violet-500 text-base" : ""}`} style={highlight ? {} : { color: "var(--text-primary)" }}>
         {value}
       </span>
