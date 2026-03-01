@@ -12,6 +12,7 @@ import { useLocale, LOCALES } from "@/i18n/useLocale";
 import { useTheme } from "@/context/ThemeContext";
 import { useTranslations } from "next-intl";
 import { MathText } from "@/components/Math";
+import MathComponent from "@/components/Math";
 
 const CANVAS_HEIGHT_DESKTOP = 520;
 const CANVAS_HEIGHT_MOBILE = 320;
@@ -160,8 +161,8 @@ export default function HomePage() {
           <div className="flex items-center gap-3 h-9">
             {stats.piEstimate !== null ? (
               <>
-                <span className="text-3xl font-mono font-bold text-violet-500">
-                  π ≈ {stats.piEstimate.toFixed(5)}
+                <span className="text-2xl font-mono font-bold text-violet-500 flex items-center gap-1">
+                  <MathComponent math={String.raw`\hat{\pi} \approx ${stats.piEstimate.toFixed(5)}`} />
                 </span>
                 <span className={`text-sm px-3 py-1 rounded-full font-mono ${
                   stats.error! < 0.01 ? "bg-emerald-500/15 text-emerald-500"

@@ -83,7 +83,7 @@ export default function InfoModal({ onClose }: InfoModalProps) {
           <SectionTitle><MathText text={t("infoEstimateTitle")} /></SectionTitle>
           <p><MathText text={t("infoEstimate")} /></p>
           <div className="my-3 py-3 rounded-xl text-center" style={{ background: "var(--bg-panel-alt)" }}>
-            <Math block math={String.raw`\pi \approx \frac{2ln}{dc}`} />
+            <Math block math={String.raw`\hat{\pi} \approx \frac{2l \cdot n}{d \cdot c}`} />
           </div>
           <p><MathText text={t("infoConverge")} /></p>
 

@@ -39,19 +39,16 @@ const NeedleCanvas = forwardRef<NeedleCanvasHandle, NeedleCanvasProps>(function 
   const isDark = theme === "dark";
   const isDarkRef = useRef(isDark);
 
-  // Keep colour ref in sync so incremental draws use the right colours
   useEffect(() => { isDarkRef.current = isDark; }, [isDark]);
 
   // ── helpers ──────────────────────────────────────────────────────────────
 
-  /** Returns context already scaled for the current devicePixelRatio. */
   function getCtx() {
     const canvas = canvasRef.current;
     if (!canvas) return null;
     return canvas.getContext("2d") ?? null;
   }
 
-  /** Scale the canvas backing store to match devicePixelRatio. */
   function applyDpr() {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -59,9 +56,7 @@ const NeedleCanvas = forwardRef<NeedleCanvasHandle, NeedleCanvasProps>(function 
     canvas.width = Math.round(width * dpr);
     canvas.height = Math.round(height * dpr);
     const ctx = canvas.getContext("2d");
-    if (ctx) {
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    }
+    if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
   function drawBackground(ctx: CanvasRenderingContext2D) {
@@ -123,7 +118,7 @@ const NeedleCanvas = forwardRef<NeedleCanvasHandle, NeedleCanvasProps>(function 
 
   useImperativeHandle(ref, () => ({ appendNeedles, fullRedraw }), [appendNeedles, fullRedraw]);
 
-  // ── react to needles prop change (reset / manual drop / click) ────────────
+  // ── react to needles prop change (reset / manual drop) ────────────────────
 
   useEffect(() => {
     needlesRef.current = needles;
@@ -143,16 +138,12 @@ const NeedleCanvas = forwardRef<NeedleCanvasHandle, NeedleCanvasProps>(function 
     const canvas = canvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
-    // coords are in CSS pixels — no DPR correction needed here because
-    // the canvas transform maps CSS px → logical px automatically
     onCanvasClick(e.clientX - rect.left, e.clientY - rect.top);
   }
 
   return (
     <canvas
       ref={canvasRef}
-      // Physical size is set dynamically via applyDpr(); these attrs are just
-      // initial placeholders — style controls the visible CSS size.
       width={width}
       height={height}
       onClick={handleClick}

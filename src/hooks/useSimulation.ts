@@ -40,8 +40,14 @@ interface UseSimulationReturn {
   dropAtPosition: (cx: number, cy: number) => void;
 }
 
-/** Minimum ms between React state flushes during animation (throttle). */
-const STATE_FLUSH_INTERVAL_MS = 80;
+/** Returns adaptive flush interval in ms based on current speed config. */
+function adaptiveFlushInterval(speed: number): number {
+  if (speed < 1) return 0; // flush every drop for very slow speeds
+  if (speed <= 5) return 40;  // ~25fps feel, responsive at low speeds
+  if (speed <= 20) return 80; // default
+  if (speed <= 100) return 150;
+  return 250; // very high speed - less frequent updates
+}
 
 export function useSimulation(canvasWidth: number, canvasHeight: number): UseSimulationReturn {
   const [needles, setNeedles] = useState<Needle[]>([]);
@@ -92,9 +98,10 @@ export function useSimulation(canvasWidth: number, canvasHeight: number): UseSim
       // Draw on canvas immediately (no React re-render needed)
       canvasRef.current?.appendNeedles(incoming);
 
-      // Throttle React state flushes
+      // Throttle React state flushes — adaptive based on current speed
       const now = performance.now();
-      if (now - lastFlushRef.current >= STATE_FLUSH_INTERVAL_MS) {
+      const flushInterval = adaptiveFlushInterval(configRef.current.speed);
+      if (flushInterval === 0 || now - lastFlushRef.current >= flushInterval) {
         lastFlushRef.current = now;
         setNeedles([...needlesRef.current]);
         setStats({ ...statsRef.current });

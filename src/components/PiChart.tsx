@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
+import { MathText } from "@/components/Math";
 import {
   LineChart,
   Line,
@@ -34,8 +35,8 @@ function ChartTooltip({ active, payload }: { active?: boolean; payload?: { value
       className="rounded-xl border px-3 py-2 text-xs shadow-xl"
       style={{ background: "var(--bg-panel-solid)", borderColor: "var(--border)", color: "var(--text-primary)" }}
     >
-      <div className="font-mono font-bold">π ≈ {val.toFixed(6)}</div>
-      <div style={{ color: "var(--text-muted)" }}>Δ {err.toFixed(6)}</div>
+      <div className="font-mono font-bold"><MathText text={`$\\hat{\\pi}$ ≈ ${val.toFixed(6)}`} /></div>
+      <div style={{ color: "var(--text-muted)" }}><MathText text={`$\\Delta$ ${err.toFixed(6)}`} /></div>
     </div>
   );
 }
@@ -101,7 +102,16 @@ function ChartInner({
           stroke={piColor}
           strokeDasharray="7 4"
           strokeWidth={1.5}
-          label={{ value: "π", position: "right", fill: piColor, fontSize: 13, fontWeight: "bold" }}
+          label={(props: { viewBox?: { x?: number; y?: number; width?: number } }) => {
+            const vb = props.viewBox ?? {};
+            const x = (vb.x ?? 0) + (vb.width ?? 0) + 6;
+            const y = vb.y ?? 0;
+            return (
+              <text x={x} y={y + 4} fill={piColor} fontSize={13} fontWeight="bold" fontFamily="KaTeX_Math, serif" fontStyle="italic">
+                π
+              </text>
+            );
+          }}
         />
         <Line
           type="monotone"
@@ -154,7 +164,7 @@ function PiChartModal({ history, onClose }: { history: PiDataPoint[]; onClose: (
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: "var(--border)" }}>
           <h2 className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>
-            {t("chartPiConvergence")}
+            <MathText text={t("chartPiConvergence")} />
           </h2>
           <button
             onClick={onClose}
@@ -206,7 +216,7 @@ export default function PiChart({ history, height = 200 }: PiChartProps) {
         {/* Chart header row */}
         <div className="flex items-center justify-between px-4 pt-3 pb-1">
           <span className="text-xs font-semibold" style={{ color: "var(--text-muted)" }}>
-            {t("chartPiConvergence")}
+            <MathText text={t("chartPiConvergence")} />
           </span>
           <button
             onClick={open}

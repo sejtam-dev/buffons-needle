@@ -125,9 +125,12 @@ self.onmessage = (e: MessageEvent<WorkerInMessage>) => {
 
     const stats = makeStats();
 
-    // Record a history point every ~50 needles
+    // Adaptive history interval: record more frequently at low counts for chart smoothness,
+    // and less frequently at high counts to avoid too many data points.
+    // Target ~500 points max; interval grows roughly as sqrt(total).
+    const adaptiveInterval = Math.max(1, Math.round(Math.sqrt(Math.max(total, 1)) * 0.7));
     let historyPoint: WorkerBatchResult["historyPoint"];
-    if (stats.piEstimate !== null && total - lastHistoryTotal >= 50) {
+    if (stats.piEstimate !== null && total - lastHistoryTotal >= adaptiveInterval) {
       historyPoint = { total, piEstimate: stats.piEstimate };
       lastHistoryTotal = total;
     }
