@@ -1,16 +1,17 @@
 @import "tailwindcss";
+
 @variant dark (&:where(.dark, .dark *));
 
 /* Light mode defaults */
 :root {
-    --bg-base:        #f1f5f9;
-    --bg-panel:       #ffffff;
-    --bg-panel-alt:   #f8fafc;
+    --bg-base: #f1f5f9;
+    --bg-panel: #ffffff;
+    --bg-panel-alt: #f8fafc;
     --bg-panel-solid: #ffffff;
-    --border:         #e2e8f0;
-    --text-primary:   #0f172a;
-    --text-muted:     #64748b;
-    --text-subtle:    #94a3b8;
+    --border: #e2e8f0;
+    --text-primary: #0f172a;
+    --text-muted: #64748b;
+    --text-subtle: #94a3b8;
 
     --scrollbar-track: #e2e8f0;
     --scrollbar-thumb: #94a3b8;
@@ -19,14 +20,14 @@
 
 /* Dark mode overrides (applied via .dark on <html>) */
 .dark {
-    --bg-base:        #0f172a;
-    --bg-panel:       rgba(30,41,59,0.6);
-    --bg-panel-alt:   rgba(15,23,42,0.7);
+    --bg-base: #0f172a;
+    --bg-panel: rgba(30, 41, 59, 0.6);
+    --bg-panel-alt: rgba(15, 23, 42, 0.7);
     --bg-panel-solid: #1e293b;
-    --border:         rgba(51,65,85,0.5);
-    --text-primary:   #f1f5f9;
-    --text-muted:     #94a3b8;
-    --text-subtle:    #64748b;
+    --border: rgba(51, 65, 85, 0.5);
+    --text-primary: #f1f5f9;
+    --text-muted: #94a3b8;
+    --text-subtle: #64748b;
 
     --scrollbar-track: #1e293b;
     --scrollbar-thumb: #334155;
@@ -71,9 +72,11 @@ input[type="range"]::-webkit-slider-thumb {
     border: 2px solid transparent;
     transition: background 0.15s;
 }
+
 input[type="range"]::-webkit-slider-thumb:hover {
     background: #8b5cf6;
 }
+
 input[type="range"]::-moz-range-thumb {
     width: 14px;
     height: 14px;
@@ -90,19 +93,23 @@ input[type="range"]::-moz-range-thumb {
     width: 8px;
     height: 8px;
 }
+
 ::-webkit-scrollbar-track {
     background: var(--scrollbar-track);
     border-radius: 999px;
 }
+
 ::-webkit-scrollbar-thumb {
     background: var(--scrollbar-thumb);
     border-radius: 999px;
     border: 2px solid var(--scrollbar-track);
     transition: background 0.2s;
 }
+
 ::-webkit-scrollbar-thumb:hover {
     background: var(--scrollbar-thumb-hover);
 }
+
 ::-webkit-scrollbar-corner {
     background: var(--scrollbar-track);
 }

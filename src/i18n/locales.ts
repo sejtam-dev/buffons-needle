@@ -7,9 +7,8 @@ export type LocaleCode = "en" | "cs" | "de" | "fr";
 export const locales: LocaleCode[] = ["en", "cs", "de", "fr"];
 
 export const LOCALES: Record<LocaleCode, { label: string; flag: string }> = {
-  en: { label: "English", flag: "🇬🇧" },
-  cs: { label: "Čeština", flag: "🇨🇿" },
-  de: { label: "Deutsch", flag: "🇩🇪" },
-  fr: { label: "Français", flag: "🇫🇷" },
+    en: { label: "English", flag: "🇬🇧" },
+    cs: { label: "Čeština", flag: "🇨🇿" },
+    de: { label: "Deutsch", flag: "🇩🇪" },
+    fr: { label: "Français", flag: "🇫🇷" },
 };
-

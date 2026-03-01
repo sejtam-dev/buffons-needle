@@ -14,49 +14,49 @@
  */
 
 export interface WorkerConfigMessage {
-  type: "configure";
-  width: number;
-  height: number;
-  needleLength: number;
-  lineSpacing: number;
-  /** Reset counters when true (used on config change / reset) */
-  reset: boolean;
+    type: "configure";
+    width: number;
+    height: number;
+    needleLength: number;
+    lineSpacing: number;
+    /** Reset counters when true (used on config change / reset) */
+    reset: boolean;
 }
 
 export interface WorkerBatchMessage {
-  type: "batch";
-  size: number;
+    type: "batch";
+    size: number;
 }
 
 export interface WorkerDropMessage {
-  type: "drop";
-  cx: number;
-  cy: number;
+    type: "drop";
+    cx: number;
+    cy: number;
 }
 
 export type WorkerInMessage = WorkerConfigMessage | WorkerBatchMessage | WorkerDropMessage;
 
 // ── types mirrored here to avoid importing from src/types inside a worker ──
 export interface WorkerNeedle {
-  cx: number;
-  cy: number;
-  angle: number;
-  crossing: boolean;
+    cx: number;
+    cy: number;
+    angle: number;
+    crossing: boolean;
 }
 
 export interface WorkerStats {
-  total: number;
-  crossings: number;
-  piEstimate: number | null;
-  error: number | null;
+    total: number;
+    crossings: number;
+    piEstimate: number | null;
+    error: number | null;
 }
 
 export interface WorkerBatchResult {
-  type: "batch";
-  needles: WorkerNeedle[];
-  stats: WorkerStats;
-  /** Present only when a new history point was recorded */
-  historyPoint?: { total: number; piEstimate: number };
+    type: "batch";
+    needles: WorkerNeedle[];
+    stats: WorkerStats;
+    /** Present only when a new history point was recorded */
+    historyPoint?: { total: number; piEstimate: number };
 }
 
 export type WorkerOutMessage = WorkerBatchResult;
@@ -72,94 +72,93 @@ let crossings = 0;
 let lastHistoryTotal = 0;
 
 function checkCrossing(cy: number, angle: number, l: number, d: number): boolean {
-  const halfProjection = (l / 2) * Math.abs(Math.sin(angle));
-  const distToNearestLine = cy % d;
-  return distToNearestLine <= halfProjection || (d - distToNearestLine) <= halfProjection;
+    const halfProjection = (l / 2) * Math.abs(Math.sin(angle));
+    const distToNearestLine = cy % d;
+    return distToNearestLine <= halfProjection || d - distToNearestLine <= halfProjection;
 }
 
 function estimatePi(t: number, c: number, l: number, d: number): number {
-  return (2 * l * t) / (d * c);
+    return (2 * l * t) / (d * c);
 }
 
 function generateNeedle(): WorkerNeedle {
-  const cx = Math.random() * width;
-  const cy = Math.random() * height;
-  const angle = Math.random() * Math.PI;
-  return { cx, cy, angle, crossing: checkCrossing(cy, angle, needleLength, lineSpacing) };
+    const cx = Math.random() * width;
+    const cy = Math.random() * height;
+    const angle = Math.random() * Math.PI;
+    return { cx, cy, angle, crossing: checkCrossing(cy, angle, needleLength, lineSpacing) };
 }
 
 function makeStats(): WorkerStats {
-  const piEst = crossings > 0 ? estimatePi(total, crossings, needleLength, lineSpacing) : null;
-  return {
-    total,
-    crossings,
-    piEstimate: piEst,
-    error: piEst !== null ? Math.abs(piEst - Math.PI) : null,
-  };
+    const piEst = crossings > 0 ? estimatePi(total, crossings, needleLength, lineSpacing) : null;
+    return {
+        total,
+        crossings,
+        piEstimate: piEst,
+        error: piEst !== null ? Math.abs(piEst - Math.PI) : null,
+    };
 }
 
 self.onmessage = (e: MessageEvent<WorkerInMessage>) => {
-  const msg = e.data;
+    const msg = e.data;
 
-  if (msg.type === "configure") {
-    width = msg.width;
-    height = msg.height;
-    needleLength = msg.needleLength;
-    lineSpacing = msg.lineSpacing;
-    if (msg.reset) {
-      total = 0;
-      crossings = 0;
-      lastHistoryTotal = 0;
-    }
-    return;
-  }
-
-  if (msg.type === "batch") {
-    const needles: WorkerNeedle[] = [];
-    for (let i = 0; i < msg.size; i++) {
-      const n = generateNeedle();
-      needles.push(n);
-      total++;
-      if (n.crossing) crossings++;
+    if (msg.type === "configure") {
+        width = msg.width;
+        height = msg.height;
+        needleLength = msg.needleLength;
+        lineSpacing = msg.lineSpacing;
+        if (msg.reset) {
+            total = 0;
+            crossings = 0;
+            lastHistoryTotal = 0;
+        }
+        return;
     }
 
-    const stats = makeStats();
+    if (msg.type === "batch") {
+        const needles: WorkerNeedle[] = [];
+        for (let i = 0; i < msg.size; i++) {
+            const n = generateNeedle();
+            needles.push(n);
+            total++;
+            if (n.crossing) crossings++;
+        }
 
-    // Adaptive history interval: record more frequently at low counts for chart smoothness,
-    // and less frequently at high counts to avoid too many data points.
-    // Target ~500 points max; interval grows roughly as sqrt(total).
-    const adaptiveInterval = Math.max(1, Math.round(Math.sqrt(Math.max(total, 1)) * 0.7));
-    let historyPoint: WorkerBatchResult["historyPoint"];
-    if (stats.piEstimate !== null && total - lastHistoryTotal >= adaptiveInterval) {
-      historyPoint = { total, piEstimate: stats.piEstimate };
-      lastHistoryTotal = total;
+        const stats = makeStats();
+
+        // Adaptive history interval: record more frequently at low counts for chart smoothness,
+        // and less frequently at high counts to avoid too many data points.
+        // Target ~500 points max; interval grows roughly as sqrt(total).
+        const adaptiveInterval = Math.max(1, Math.round(Math.sqrt(Math.max(total, 1)) * 0.7));
+        let historyPoint: WorkerBatchResult["historyPoint"];
+        if (stats.piEstimate !== null && total - lastHistoryTotal >= adaptiveInterval) {
+            historyPoint = { total, piEstimate: stats.piEstimate };
+            lastHistoryTotal = total;
+        }
+
+        const result: WorkerBatchResult = { type: "batch", needles, stats, historyPoint };
+        self.postMessage(result);
+        return;
     }
 
-    const result: WorkerBatchResult = { type: "batch", needles, stats, historyPoint };
-    self.postMessage(result);
-    return;
-  }
+    if (msg.type === "drop") {
+        const angle = Math.random() * Math.PI;
+        const needle: WorkerNeedle = {
+            cx: msg.cx,
+            cy: msg.cy,
+            angle,
+            crossing: checkCrossing(msg.cy, angle, needleLength, lineSpacing),
+        };
+        total++;
+        if (needle.crossing) crossings++;
 
-  if (msg.type === "drop") {
-    const angle = Math.random() * Math.PI;
-    const needle: WorkerNeedle = {
-      cx: msg.cx,
-      cy: msg.cy,
-      angle,
-      crossing: checkCrossing(msg.cy, angle, needleLength, lineSpacing),
-    };
-    total++;
-    if (needle.crossing) crossings++;
+        const stats = makeStats();
+        let historyPoint: WorkerBatchResult["historyPoint"];
+        if (stats.piEstimate !== null) {
+            historyPoint = { total, piEstimate: stats.piEstimate };
+            lastHistoryTotal = total;
+        }
 
-    const stats = makeStats();
-    let historyPoint: WorkerBatchResult["historyPoint"];
-    if (stats.piEstimate !== null) {
-      historyPoint = { total, piEstimate: stats.piEstimate };
-      lastHistoryTotal = total;
+        const result: WorkerBatchResult = { type: "batch", needles: [needle], stats, historyPoint };
+        self.postMessage(result);
     }
-
-    const result: WorkerBatchResult = { type: "batch", needles: [needle], stats, historyPoint };
-    self.postMessage(result);
-  }
 };
-

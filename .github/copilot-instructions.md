@@ -8,14 +8,14 @@ README explicitly overrides them.
 
 ## Tech Stack
 
-| Layer | Choice | Notes |
-|---|---|---|
-| Framework | Next.js (App Router) | No Pages Router |
-| Language | TypeScript 5 — strict | No `any`, no `// @ts-ignore` |
-| Styling | Tailwind CSS v4 | Layout / spacing only — see Design System |
-| Fonts | Geist Sans + Geist Mono via `next/font` | |
-| Deployment | Vercel | Auto-deploy from `main` |
-| License | MIT | `LICENSE` file in repo root |
+| Layer      | Choice                                  | Notes                                     |
+|------------|-----------------------------------------|-------------------------------------------|
+| Framework  | Next.js (App Router)                    | No Pages Router                           |
+| Language   | TypeScript 5 — strict                   | No `any`, no `// @ts-ignore`              |
+| Styling    | Tailwind CSS v4                         | Layout / spacing only — see Design System |
+| Fonts      | Geist Sans + Geist Mono via `next/font` |                                           |
+| Deployment | Vercel                                  | Auto-deploy from `main`                   |
+| License    | MIT                                     | `LICENSE` file in repo root               |
 
 ---
 
@@ -28,7 +28,7 @@ src/
 ├── app/
 │   ├── layout.tsx        # Root layout — wraps with providers, sets metadata
 │   ├── page.tsx          # Main page — composes panels, wires up hooks
-│   ├── globals.css       # CSS custom properties + Tailwind import
+│   ├── globals.css       # CSS custom properties + Tailwind import + @variant dark
 │   └── icon.svg          # Favicon (Next.js picks it up automatically)
 ├── components/           # UI components — presentational, no business logic
 ├── context/              # React contexts (theme, etc.)
@@ -41,6 +41,7 @@ src/
 ```
 
 Root level:
+
 ```
 messages/
 ├── en.json               # English strings
@@ -50,6 +51,7 @@ messages/
 ```
 
 Rules:
+
 - `components/` contains only presentational components
 - `hooks/` owns all state and logic — components just render and call callbacks
 - `types/` contains only interfaces/types, no runtime code
@@ -61,32 +63,39 @@ Rules:
 
 ### Theming
 
-Dark/light mode is controlled by a `.dark` class on `<html>`, toggled by `ThemeContext`.
+Dark/light mode is controlled by a `.dark` class on `<html>`, managed by `next-themes` via `ThemeContext`.
 Colors are defined as CSS custom properties in `globals.css`:
 
 ```css
+@import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+
 :root {
-  --bg-base:        #f1f5f9;
-  --bg-panel:       #ffffff;
-  --bg-panel-alt:   #f8fafc;
-  --bg-panel-solid: #ffffff;   /* Always opaque — use for dropdowns/modals */
-  --border:         #e2e8f0;
-  --text-primary:   #0f172a;
-  --text-muted:     #64748b;
-  --text-subtle:    #94a3b8;
+    --bg-base: #f1f5f9;
+    --bg-panel: #ffffff;
+    --bg-panel-alt: #f8fafc;
+    --bg-panel-solid: #ffffff; /* Always opaque — use for dropdowns/modals */
+    --border: #e2e8f0;
+    --text-primary: #0f172a;
+    --text-muted: #64748b;
+    --text-subtle: #94a3b8;
 }
 
 .dark {
-  --bg-base:        #0f172a;
-  --bg-panel:       rgba(30,41,59,0.6);
-  --bg-panel-alt:   rgba(15,23,42,0.7);
-  --bg-panel-solid: #1e293b;
-  --border:         rgba(51,65,85,0.5);
-  --text-primary:   #f1f5f9;
-  --text-muted:     #94a3b8;
-  --text-subtle:    #64748b;
+    --bg-base: #0f172a;
+    --bg-panel: rgba(30, 41, 59, 0.6);
+    --bg-panel-alt: rgba(15, 23, 42, 0.7);
+    --bg-panel-solid: #1e293b;
+    --border: rgba(51, 65, 85, 0.5);
+    --text-primary: #f1f5f9;
+    --text-muted: #94a3b8;
+    --text-subtle: #64748b;
 }
 ```
+
+> **Tailwind v4 dark variant** — In Tailwind v4, `dark:` utilities do **not** work automatically via `.dark` class.
+> The `@variant dark` directive in `globals.css` must be present for `dark:block`, `dark:hidden`, etc. to work.
 
 ### Color Rules
 
@@ -99,12 +108,12 @@ Colors are defined as CSS custom properties in `globals.css`:
 
 These can use Tailwind directly since they don't change with the theme:
 
-| Purpose | Color |
-|---|---|
-| Primary accent | `violet-500` / `violet-600` |
-| Success / low error | `emerald-500` |
-| Warning / medium error | `amber-500` |
-| Error / high deviation | `rose-500` |
+| Purpose                | Color                       |
+|------------------------|-----------------------------|
+| Primary accent         | `violet-500` / `violet-600` |
+| Success / low error    | `emerald-500`               |
+| Warning / medium error | `amber-500`                 |
+| Error / high deviation | `rose-500`                  |
 
 ### Spacing & Shape
 
@@ -120,6 +129,7 @@ These can use Tailwind directly since they don't change with the theme:
 ### 1. Logic in Hooks, Not Components
 
 All business logic, state, and side effects live in `hooks/`. Components only:
+
 - Render based on props
 - Call callbacks passed in as props
 - Hold purely local UI state (e.g. open/closed dropdown)
@@ -134,7 +144,7 @@ const [draft, setDraft] = useState(config);
 
 // ✅ Correct — always derive from props
 function update(partial) {
-  onConfigChange({ ...config, ...partial });
+    onConfigChange({...config, ...partial});
 }
 ```
 
@@ -154,6 +164,7 @@ const something = derive(prop); // computed on every render
 ### 4. Ref-First for Animations
 
 For animation loops (e.g. `requestAnimationFrame`):
+
 - Keep the mutable working data in refs (`useRef`)
 - Flush to React state **at most once per ~80ms** to avoid saturating the main thread
 - Always flush on pause/stop so the UI reflects final state
@@ -188,6 +199,7 @@ from the animation loop — bypassing React's render cycle entirely for per-fram
 ### "use client"
 
 Add `"use client"` only where necessary:
+
 - Components that use hooks (`useState`, `useEffect`, `useRef`, etc.)
 - Components with browser APIs (`canvas`, `window`, `document`)
 - Do **not** add it to pure presentational server components
@@ -198,7 +210,9 @@ The project uses the React Compiler (`babel-plugin-react-compiler`). These patte
 
 ```ts
 // ❌ setState directly in useEffect body
-useEffect(() => { setState(value); });
+useEffect(() => {
+    setState(value);
+});
 
 // ❌ Mutating a ref during render
 myRef.current = something; // must be inside useEffect or event handler
@@ -212,8 +226,10 @@ myRef.current = something; // must be inside useEffect or event handler
 
 - **Library:** `next-intl`
 - Translation strings live in `messages/{locale}.json` files
-- Shared locale metadata (`LocaleCode`, `LOCALES`, `locales`) in `src/i18n/locales.ts` — safe to import from both server and client
-- Server-side locale detection in `src/i18n/request.ts` — reads cookie first, then `Accept-Language` header, falls back to `"en"`
+- Shared locale metadata (`LocaleCode`, `LOCALES`, `locales`) in `src/i18n/locales.ts` — safe to import from both server
+  and client
+- Server-side locale detection in `src/i18n/request.ts` — reads cookie first, then `Accept-Language` header, falls back
+  to `"en"`
 - Client-side switching via `useLocale()` hook — writes a cookie and reloads the page
 
 ### Using translations in components
@@ -222,11 +238,14 @@ Call `useTranslations()` directly inside each component that needs strings — d
 
 ```ts
 // ✅ Correct — call it where you need it
-import { useTranslations } from "next-intl";
+import {useTranslations} from "next-intl";
 
 export default function MyComponent() {
-  const t = useTranslations();
-  return <p>{t("someKey")}</p>;
+    const t = useTranslations();
+    return <p>{t("someKey"
+)
+}
+    </p>;
 }
 ```
 
@@ -236,7 +255,7 @@ Passing `t` as a prop was a pattern from the old custom hook and adds unnecessar
 
 ```ts
 // Simple value interpolation
-t("descSpeedSlow", { n: 10 })  // "One needle every 10 frames"
+t("descSpeedSlow", {n: 10})  // "One needle every 10 frames"
 ```
 
 ### Adding a new string
@@ -250,23 +269,25 @@ t("descSpeedSlow", { n: 10 })  // "One needle every 10 frames"
 Translation strings may contain inline LaTeX wrapped in `$...$`. Use the `MathText` component to render them:
 
 ```tsx
-import { MathText } from "@/components/Math";
+import {MathText} from "@/components/Math";
 
 // In JSX — renders $\pi$ as a proper KaTeX symbol
-<p><MathText text={t("someKey")} /></p>
+<p><MathText text={t("someKey")}/></p>
 ```
 
 In JSON files, backslashes must be escaped:
+
 ```json
 "appSubtitle": "Estimating $\\pi$ through geometric probability",
 "infoCondition": "Let $y_c$ be the distance and $\\theta$ the angle."
 ```
 
 For standalone block equations (not from translations), use the `Math` component directly:
+
 ```tsx
 import Math from "@/components/Math";
 
-<Math block math={String.raw`P = \frac{2l}{d\pi}`} />
+<Math block math={String.raw`P = \frac{2l}{d\pi}`}/>
 ```
 
 The `Math` and `MathText` components live in `src/components/Math.tsx`. KaTeX CSS is imported globally in `layout.tsx`.
@@ -285,20 +306,24 @@ The `Math` and `MathText` components live in `src/components/Math.tsx`. KaTeX CS
 Every project includes these by default:
 
 ### Header
+
 - App icon (rounded-lg, `bg-violet-600`, shows a relevant symbol)
 - Title + subtitle
 - `?` info button → opens an `InfoModal` (portal, closeable via Escape / backdrop / ×)
-- Theme toggle (☀️ / 🌙)
+- Theme toggle — SVG sun/moon icons, both always rendered, visibility controlled via `dark:hidden` / `dark:block`
 - `LocaleSwitcher` dropdown
 
 ### Footer
+
 - Copyright `© YEAR @Sejtam_` with link to `https://github.com/sejtam-dev`
 - GitHub repo link with GitHub icon
 - Star button → main repo page (NOT `/stargazers`) — shows live star count badge fetched from GitHub API
 - Fork button → `repo/fork` — shows live fork count badge fetched from GitHub API
-- Counts are fetched client-side via `https://api.github.com/repos/{owner}/{repo}` on mount; if the request fails the badges are simply hidden (no error shown)
+- Counts are fetched client-side via `https://api.github.com/repos/{owner}/{repo}` on mount; if the request fails the
+  badges are simply hidden (no error shown)
 
 ### InfoModal
+
 - Rendered via `createPortal` into `document.body`
 - Closes on: Escape key, backdrop click, × button
 - Locks body scroll while open
@@ -368,39 +393,96 @@ nextjs typescript tailwindcss canvas simulation math [domain-specific tags]
 
 ## Common Pitfalls
 
-| ❌ Don't | ✅ Do instead |
-|---|---|
-| Hardcode colors in Tailwind (`text-slate-400`) | Use `style={{ color: "var(--text-muted)" }}` |
-| Use `--bg-panel` for dropdowns/modals | Use `--bg-panel-solid` |
-| Initialize state from props and mutate locally | Work directly with props (controlled component) |
-| Call `setState` inside `useEffect` body | Derive the value during render |
-| Pass `t` as a prop to components | Call `useTranslations()` directly in the component |
-| Put logic/state inside components | Move it to a custom hook |
-| Write `any` types | Define a proper interface in `types/` |
-| Multiline className strings (causes SSR hydration mismatch on Windows) | Keep className on a single line |
-| Add a key to only one `messages/*.json` | Add the key to **all** locale files simultaneously |
-| Write math symbols as plain text (`π`, `y_c`, `θ`) | Use `$\\pi$`, `$y_c$`, `$\\theta$` in translations + `MathText` in JSX |
-| Use `\\\\pi` (four backslashes) in JSON | Use `\\pi` (two backslashes) — JSON needs one escape level, LaTeX needs one |
-| Use `npm ci` in CI on a Windows-generated lock file | Use `npm install` — avoids platform-specific dependency mismatch |
-| Set `className="dark"` statically on `<html>` in layout | Use the theme-init inline script + `suppressHydrationWarning` |
+| ❌ Don't                                                                | ✅ Do instead                                                                            |
+|------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
+| Hardcode colors in Tailwind (`text-slate-400`)                         | Use `style={{ color: "var(--text-muted)" }}`                                            |
+| Use `--bg-panel` for dropdowns/modals                                  | Use `--bg-panel-solid`                                                                  |
+| Initialize state from props and mutate locally                         | Work directly with props (controlled component)                                         |
+| Call `setState` inside `useEffect` body                                | Derive the value during render                                                          |
+| Pass `t` as a prop to components                                       | Call `useTranslations()` directly in the component                                      |
+| Put logic/state inside components                                      | Move it to a custom hook                                                                |
+| Write `any` types                                                      | Define a proper interface in `types/`                                                   |
+| Multiline className strings (causes SSR hydration mismatch on Windows) | Keep className on a single line                                                         |
+| Add a key to only one `messages/*.json`                                | Add the key to **all** locale files simultaneously                                      |
+| Write math symbols as plain text (`π`, `y_c`, `θ`)                     | Use `$\\pi$`, `$y_c$`, `$\\theta$` in translations + `MathText` in JSX                  |
+| Use `\\\\pi` (four backslashes) in JSON                                | Use `\\pi` (two backslashes) — JSON needs one escape level, LaTeX needs one             |
+| Use `npm ci` in CI on a Windows-generated lock file                    | Use `npm install` — avoids platform-specific dependency mismatch                        |
+| Use inline script + custom ThemeContext for dark mode                  | Use `next-themes` — handles SSR, hydration and localStorage automatically               |
+| Read `document.documentElement.classList` during render                | Use `useTheme()` from `ThemeContext` which wraps `next-themes`                          |
+| Conditionally render different JSX for dark/light icon                 | Render both SVGs, control visibility with `dark:hidden` / `dark:block`                  |
+| Forget `@variant dark` in `globals.css` with Tailwind v4               | Always include `@variant dark (&:where(.dark, .dark *));` after `@import "tailwindcss"` |
+| Use `typeof window !== 'undefined'` for theme detection                | Use `next-themes` — causes hydration mismatch on Vercel                                 |
 
 ---
 
 ## Theme Initialisation
 
-To prevent a flash of wrong theme and avoid hydration mismatches, `layout.tsx` must include
-an inline script that runs **before** React hydrates:
+Theme is managed by **`next-themes`** (`ThemeProvider` from `next-themes` wrapped in a local `ThemeContext` bridge).
+
+### Setup
+
+`layout.tsx`:
 
 ```tsx
-// layout.tsx — inside <html suppressHydrationWarning>
-<Script id="theme-init" strategy="beforeInteractive">
-  {`(function(){try{var t=localStorage.getItem('theme');document.documentElement.classList.toggle('dark',t!=='light')}catch(e){}})();`}
-</Script>
+// <html> must have suppressHydrationWarning — next-themes sets class before hydration
+<html lang={locale} suppressHydrationWarning>
+<body>
+<ThemeProvider>  {/* from src/context/ThemeContext.tsx */}
+    {children}
+</ThemeProvider>
+</body>
+</html>
 ```
 
-- Default theme is **dark** (anything other than the stored value `"light"` → dark class applied)
-- `ThemeContext` reads the initial class from `document.documentElement` on first render so React state matches the DOM immediately — no extra toggle after hydration
-- Theme preference is persisted to `localStorage` on every toggle
+`ThemeContext.tsx`:
+
+```tsx
+import {ThemeProvider as NextThemesProvider, useTheme as useNextTheme} from "next-themes";
+
+export function ThemeProvider({children}) {
+    return (
+        <NextThemesProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
+            <ThemeContextBridge>{children}</ThemeContextBridge>
+        </NextThemesProvider>
+    );
+}
+```
+
+`globals.css` — required for `dark:` Tailwind utilities to work:
+
+```css
+@import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+```
+
+### Theme Toggle Icon Pattern
+
+Always render **both** icons and toggle visibility via CSS — this avoids hydration mismatches because the HTML is
+identical on server and client:
+
+```tsx
+{/* Sun — shown in dark mode */
+}
+<svg className="hidden dark:block" ...>...</svg>
+{/* Moon — shown in light mode */
+}
+<svg className="block dark:hidden" ...>...</svg>
+```
+
+**Never** conditionally render one icon based on `theme === "dark"` — this causes React hydration errors on Vercel
+because the server renders with the default theme but the client immediately knows the stored theme.
+
+### `useTheme()` hook
+
+`ThemeContext` exposes:
+
+```ts
+const {theme, toggle, mounted} = useTheme();
+// theme:   "dark" | "light"  (always "dark" on server / before mount)
+// toggle:  () => void
+// mounted: boolean  — true only after client hydration; use to guard theme-dependent non-CSS rendering
+```
 
 ---
 
@@ -416,7 +498,6 @@ In JSON files, each backslash must be escaped once for JSON, so a single LaTeX b
 
 // ❌ Wrong — double-escaped, renders as literal \\pi in the browser
 "appSubtitle": "Estimating $\\\\pi$ through geometric probability",
-
 // ❌ Wrong — escaped dollar sign, not treated as LaTeX delimiter
 "infoSetup": "A needle of length \\$l\\$ is dropped..."
 ```
@@ -431,10 +512,6 @@ Do not "fix" correct `\\pi` to `\\\\pi` — that breaks rendering.
 `MathText` in `src/components/Math.tsx` automatically handles spacing around inline LaTeX:
 
 - Adds a small **left gap** unless the preceding text already ends with a space
-- Adds a small **right gap** unless the following text starts with punctuation (`.`, `,`, `;`, `:`, `!`, `?`, `)`) or a space
+- Adds a small **right gap** unless the following text starts with punctuation (`.`, `,`, `;`, `:`, `!`, `?`, `)`) or a
+  space
 - Do **not** manually add spaces around `$...$` delimiters in translation strings — `MathText` handles this
-
-
-
-
-

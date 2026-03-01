@@ -4,19 +4,24 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-violet.svg)](./LICENSE)
 [![Live Demo](https://img.shields.io/badge/demo-buffons--needle.sejtam.eu-7c3aed)](https://buffons-needle.sejtam.eu/)
 
-Interactive simulation of the Buffon's Needle experiment — drop needles onto a lined surface and watch $\pi$ emerge from the chaos.
+Interactive simulation of the Buffon's Needle experiment — drop needles onto a lined surface and watch $\pi$ emerge from
+the chaos.
 
 **[→ Live demo](https://buffons-needle.sejtam.eu/)**
 
 ## What is this?
 
-Buffon's Needle is an 18th-century probability problem: if you drop a needle of length $l$ onto a floor with parallel lines spaced $d$ apart, what's the probability it crosses a line? The answer involves $\pi$, which means you can flip it around and *estimate* $\pi$ just by throwing needles.
+Buffon's Needle is an 18th-century probability problem: if you drop a needle of length $l$ onto a floor with parallel
+lines spaced $d$ apart, what's the probability it crosses a line? The answer involves $\pi$, which means you can flip it
+around and *estimate* $\pi$ just by throwing needles.
 
-A needle crosses a line when its centre is within half a projection of the needle's length onto the perpendicular direction:
+A needle crosses a line when its centre is within half a projection of the needle's length onto the perpendicular
+direction:
 
 $$y_c \leq \frac{l}{2} \left|\sin\theta\right|$$
 
-where $y_c$ is the perpendicular distance from the needle's centre to the nearest line and $\theta$ is the acute angle the needle makes with the lines.
+where $y_c$ is the perpendicular distance from the needle's centre to the nearest line and $\theta$ is the acute angle
+the needle makes with the lines.
 
 Integrating over all positions and angles gives the crossing probability:
 

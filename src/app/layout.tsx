@@ -1,5 +1,5 @@
-import type {Metadata} from "next";
-import {Geist, Geist_Mono} from "next/font/google";
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "katex/dist/katex.min.css";
 import { ThemeProvider } from "@/context/ThemeContext";
@@ -22,8 +22,8 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({
-                                       children,
-                                   }: Readonly<{
+    children,
+}: Readonly<{
     children: React.ReactNode;
 }>) {
     const locale = await getLocale();
@@ -31,15 +31,11 @@ export default async function RootLayout({
 
     return (
         <html lang={locale} suppressHydrationWarning>
-        <body
-            className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
-        <NextIntlClientProvider locale={locale} messages={messages}>
-            <ThemeProvider>
-                {children}
-            </ThemeProvider>
-        </NextIntlClientProvider>
-        </body>
+            <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+                <NextIntlClientProvider locale={locale} messages={messages}>
+                    <ThemeProvider>{children}</ThemeProvider>
+                </NextIntlClientProvider>
+            </body>
         </html>
     );
 }
