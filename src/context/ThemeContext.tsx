@@ -1,6 +1,7 @@
 "use client";
 
-import React, { createContext, useContext, useCallback, useEffect, useState } from "react";
+import React, { createContext, useContext } from "react";
+import { ThemeProvider as NextThemesProvider, useTheme as useNextTheme } from "next-themes";
 
 export type Theme = "dark" | "light";
 
@@ -16,31 +17,32 @@ const ThemeContext = createContext<ThemeContextValue>({
   mounted: false,
 });
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  // Always "dark" on server and initial client render — prevents hydration mismatch.
-  // After mount we read the real value from DOM (set by the inline theme-init script).
-  const [theme, setTheme] = useState<Theme>("dark");
-  const [mounted, setMounted] = useState(false);
+function ThemeContextBridge({ children }: { children: React.ReactNode }) {
+  const { resolvedTheme, setTheme } = useNextTheme();
+  const mounted = resolvedTheme !== undefined;
+  const theme: Theme = resolvedTheme === "light" ? "light" : "dark";
 
-  useEffect(() => {
-    const actual: Theme = document.documentElement.classList.contains("dark") ? "dark" : "light";
-    setMounted(true); // eslint-disable-line react-hooks/set-state-in-effect
-    setTheme(actual);
-  }, []);
-
-  const toggle = useCallback(() => {
-    setTheme((prev) => {
-      const next: Theme = prev === "dark" ? "light" : "dark";
-      document.documentElement.classList.toggle("dark", next === "dark");
-      localStorage.setItem("theme", next);
-      return next;
-    });
-  }, []);
+  function toggle() {
+    setTheme(theme === "dark" ? "light" : "dark");
+  }
 
   return (
     <ThemeContext.Provider value={{ theme, toggle, mounted }}>
       {children}
     </ThemeContext.Provider>
+  );
+}
+
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <NextThemesProvider
+      attribute="class"
+      defaultTheme="dark"
+      enableSystem={false}
+      disableTransitionOnChange
+    >
+      <ThemeContextBridge>{children}</ThemeContextBridge>
+    </NextThemesProvider>
   );
 }
 

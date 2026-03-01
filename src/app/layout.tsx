@@ -31,10 +31,6 @@ export default async function RootLayout({
 
     return (
         <html lang={locale} suppressHydrationWarning>
-        <head>
-          {/* Inline script: sets dark/light class before first paint to avoid flash and hydration mismatch */}
-          <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('theme');document.documentElement.classList.toggle('dark',t!=='light')}catch(e){}})()` }} />
-        </head>
         <body
             className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >

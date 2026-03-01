@@ -28,7 +28,7 @@ export default function HomePage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { locale, changeLocale } = useLocale();
   const t = useTranslations();
-  const { theme, toggle: toggleTheme, mounted: themeMounted } = useTheme();
+  const { toggle: toggleTheme } = useTheme();
 
   // Measure the canvas container to make it fully responsive
   useEffect(() => {
@@ -56,8 +56,6 @@ export default function HomePage() {
   const { needles, stats, piHistory, config, isRunning, canvasRef, setConfig, start, pause, reset, dropOne, dropAtPosition } =
     useSimulation(canvasWidth, canvasHeight);
 
-  const isDark = theme === "dark";
-
   return (
     <main className="min-h-screen flex flex-col font-sans transition-colors" style={{ background: "var(--bg-base)", color: "var(--text-primary)" }}>
       {/* Header */}
@@ -83,19 +81,18 @@ export default function HomePage() {
             </button>
             <button
               onClick={toggleTheme}
-              title={themeMounted ? (isDark ? "Switch to light mode" : "Switch to dark mode") : "Toggle theme"}
+              title="Toggle theme"
               className="w-8 h-8 flex items-center justify-center rounded-full border transition-colors hover:border-violet-500 shrink-0"
               style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
             >
-              {themeMounted && (isDark ? (
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-                </svg>
-              ) : (
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                </svg>
-              ))}
+              {/* Sun icon — visible in dark mode */}
+              <svg className="hidden dark:block" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+              </svg>
+              {/* Moon icon — visible in light mode */}
+              <svg className="block dark:hidden" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+              </svg>
             </button>
             <LocaleSwitcher locale={locale} onChange={changeLocale} />
           </div>
@@ -134,16 +131,14 @@ export default function HomePage() {
                     className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors hover:text-violet-500"
                     style={{ color: "var(--text-muted)" }}
                   >
-                    {themeMounted && (isDark ? (
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-                      </svg>
-                    ) : (
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                      </svg>
-                    ))}
-                    <span>{themeMounted ? (isDark ? "Light mode" : "Dark mode") : ""}</span>
+                    <svg className="hidden dark:block" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                    </svg>
+                    <svg className="block dark:hidden" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                    </svg>
+                    <span className="hidden dark:inline">Light mode</span>
+                    <span className="inline dark:hidden">Dark mode</span>
                   </button>
                   {/* Locale list — flat buttons, no nested dropdown */}
                   <div className="border-t pt-2 flex flex-col" style={{ borderColor: "var(--border)" }}>
