@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { MathText } from "@/components/Math";
+import { useTheme } from "@/context/ThemeContext";
 import {
   LineChart,
   Line,
@@ -52,15 +52,14 @@ function ChartInner({
   showBrush: boolean;
 }) {
   const t = useTranslations();
-  const isDark =
-    typeof document !== "undefined" &&
-    document.documentElement.classList.contains("dark");
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
 
-  const gridColor   = isDark ? "rgba(51,65,85,0.5)"   : "rgba(226,232,240,0.9)";
-  const lineColor   = isDark ? "#a78bfa"               : "#7c3aed";
-  const piColor     = isDark ? "rgba(139,92,246,0.55)" : "rgba(109,40,217,0.45)";
-  const axisColor   = isDark ? "#64748b"               : "#94a3b8";
-  const brushBg     = isDark ? "#1e293b"               : "#f1f5f9";
+  const gridColor   = isDark ? "rgba(51,65,85,0.5)"    : "rgba(148,163,184,0.45)";
+  const lineColor   = isDark ? "#a78bfa"                : "#7c3aed";
+  const piColor     = isDark ? "rgba(52,211,153,0.85)"  : "rgba(16,185,129,0.8)";
+  const axisColor   = isDark ? "#64748b"                : "#94a3b8";
+  const brushBg     = isDark ? "#1e293b"                : "#f1f5f9";
 
   if (history.length === 0) {
     return (
@@ -198,14 +197,6 @@ export default function PiChart({ history, height = 200 }: PiChartProps) {
   const open  = useCallback(() => setModalOpen(true),  []);
   const close = useCallback(() => setModalOpen(false), []);
 
-  // Force re-render when theme changes so colours update
-  const [, setTick] = useState(0);
-  const moRef = useRef<MutationObserver | null>(null);
-  useEffect(() => {
-    moRef.current = new MutationObserver(() => setTick((t) => t + 1));
-    moRef.current.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
-    return () => moRef.current?.disconnect();
-  }, []);
 
   return (
     <>

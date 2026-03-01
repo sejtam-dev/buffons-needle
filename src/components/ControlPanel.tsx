@@ -275,9 +275,11 @@ function ActionButtons({ isRunning, isMaxReached, onStart, onPause, onReset, onD
             {t("btnPause")}
           </button>
         )}
-        <button onClick={onReset} className="py-2.5 px-4 rounded-xl text-sm font-semibold transition-colors" style={{ background: "var(--bg-panel-alt)", color: "var(--text-muted)" }}>
-          {t("btnReset")}
-        </button>
+        {!isMaxReached && (
+          <button onClick={onReset} className="py-2.5 px-4 rounded-xl text-sm font-semibold transition-colors" style={{ background: "var(--bg-panel-alt)", color: "var(--text-muted)" }}>
+            {t("btnReset")}
+          </button>
+        )}
       </div>
       <button onClick={onDropOne} disabled={isMaxReached} className={`w-full py-2.5 rounded-xl border border-violet-500/40 hover:border-violet-400 hover:bg-violet-500/10 text-violet-500 text-sm font-semibold transition-colors ${isMaxReached ? "opacity-40 pointer-events-none" : ""}`}>
         {t("btnDropOne")}
