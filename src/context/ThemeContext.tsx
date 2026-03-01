@@ -1,44 +1,44 @@
 "use client";
 
-import React, { createContext, useContext, useCallback, useSyncExternalStore } from "react";
+import React, { createContext, useContext, useCallback, useEffect, useState } from "react";
 
 export type Theme = "dark" | "light";
 
 interface ThemeContextValue {
   theme: Theme;
   toggle: () => void;
+  mounted: boolean;
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
   theme: "dark",
   toggle: () => {},
+  mounted: false,
 });
 
-function getSnapshot(): Theme {
-  return document.documentElement.classList.contains("dark") ? "dark" : "light";
-}
-
-function getServerSnapshot(): Theme {
-  return "dark";
-}
-
-function subscribe(cb: () => void) {
-  const mo = new MutationObserver(cb);
-  mo.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
-  return () => mo.disconnect();
-}
-
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  // Always "dark" on server and initial client render — prevents hydration mismatch.
+  // After mount we read the real value from DOM (set by the inline theme-init script).
+  const [theme, setTheme] = useState<Theme>("dark");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const actual: Theme = document.documentElement.classList.contains("dark") ? "dark" : "light";
+    setMounted(true); // eslint-disable-line react-hooks/set-state-in-effect
+    setTheme(actual);
+  }, []);
 
   const toggle = useCallback(() => {
-    const next = document.documentElement.classList.contains("dark") ? "light" : "dark";
-    document.documentElement.classList.toggle("dark", next === "dark");
-    localStorage.setItem("theme", next);
+    setTheme((prev) => {
+      const next: Theme = prev === "dark" ? "light" : "dark";
+      document.documentElement.classList.toggle("dark", next === "dark");
+      localStorage.setItem("theme", next);
+      return next;
+    });
   }, []);
 
   return (
-    <ThemeContext.Provider value={{ theme, toggle }}>
+    <ThemeContext.Provider value={{ theme, toggle, mounted }}>
       {children}
     </ThemeContext.Provider>
   );
@@ -47,3 +47,4 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 export function useTheme() {
   return useContext(ThemeContext);
 }
+
