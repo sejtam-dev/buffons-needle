@@ -143,7 +143,7 @@ interface StatTooltipProps {
 
 function StatTooltip({ formula, explanation }: StatTooltipProps) {
   const [open, setOpen] = useState(false);
-  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
+  const [pos, setPos] = useState<{ top: number; left: number; width: number } | null>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -152,19 +152,23 @@ function StatTooltip({ formula, explanation }: StatTooltipProps) {
     const r = btnRef.current.getBoundingClientRect();
     const vw = window.innerWidth;
     const vh = window.innerHeight;
-    const panelW = 272;
-    const panelH = 180; // approximate
+    const MARGIN = 8;
+    // On narrow screens shrink the panel so it always fits
+    const panelW = Math.min(272, vw - MARGIN * 2);
+    const panelH = 200; // approximate
 
     // Prefer right of button, flip left if not enough space
-    let left = r.right + 8;
-    if (left + panelW > vw - 8) left = r.left - panelW - 8;
+    let left = r.right + MARGIN;
+    if (left + panelW > vw - MARGIN) left = r.left - panelW - MARGIN;
+    // Final clamp — never go outside viewport
+    left = Math.max(MARGIN, Math.min(left, vw - panelW - MARGIN));
 
-    // Prefer below top of button, shift up if not enough space
+    // Prefer aligned to top of button, shift up if not enough space
     let top = r.top;
-    if (top + panelH > vh - 8) top = vh - panelH - 8;
-    if (top < 8) top = 8;
+    if (top + panelH > vh - MARGIN) top = vh - panelH - MARGIN;
+    if (top < MARGIN) top = MARGIN;
 
-    setPos({ top, left });
+    setPos({ top, left, width: panelW });
     setOpen(true);
   }
 
@@ -202,19 +206,36 @@ function StatTooltip({ formula, explanation }: StatTooltipProps) {
       {open && pos && typeof document !== "undefined" && createPortal(
         <div
           ref={panelRef}
-          className="fixed z-9999 w-68 rounded-xl border shadow-2xl p-3 space-y-2"
+          className="fixed z-9999 rounded-xl border shadow-2xl overflow-hidden"
           style={{
             background: "var(--bg-panel-solid)",
             borderColor: "var(--border)",
             top: pos.top,
             left: pos.left,
-            width: 272,
+            width: pos.width,
           }}
         >
-          <div className="flex justify-center py-1">
+          {/* Header with close button */}
+          <div className="flex items-center justify-between px-3 pt-2 pb-1">
+            <span className="text-xs font-semibold" style={{ color: "var(--text-subtle)" }}>Formula</span>
+            <button
+              onClick={() => setOpen(false)}
+              className="w-6 h-6 flex items-center justify-center rounded-md transition-colors hover:bg-violet-500/10 hover:text-violet-500"
+              style={{ color: "var(--text-subtle)" }}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+          {/* Formula box */}
+          <div className="mx-3 mb-2 py-2 rounded-lg flex justify-center" style={{ background: "var(--bg-panel-alt)" }}>
             <MathComponent math={formula} block />
           </div>
-          <p className="text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}><MathText text={explanation} /></p>
+          {/* Explanation */}
+          <p className="text-xs leading-relaxed text-justify px-3 pb-3" style={{ color: "var(--text-muted)" }}>
+            <MathText text={explanation} />
+          </p>
         </div>,
         document.body
       )}
