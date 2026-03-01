@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useLayoutEffect, useRef } from "react";
+import React, { createContext, useContext, useCallback, useSyncExternalStore } from "react";
 
 export type Theme = "dark" | "light";
 
@@ -14,35 +14,28 @@ const ThemeContext = createContext<ThemeContextValue>({
   toggle: () => {},
 });
 
+function getSnapshot(): Theme {
+  return document.documentElement.classList.contains("dark") ? "dark" : "light";
+}
+
+function getServerSnapshot(): Theme {
+  return "dark";
+}
+
+function subscribe(cb: () => void) {
+  const mo = new MutationObserver(cb);
+  mo.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+  return () => mo.disconnect();
+}
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("dark");
-  // Track whether the initial DOM sync has completed — we must not write
-  // localStorage until we've read the real theme from the DOM.
-  const initialised = useRef(false);
+  const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
-  useLayoutEffect(() => {
-    const actual: Theme = document.documentElement.classList.contains("dark") ? "dark" : "light";
-    initialised.current = true;
-    if (actual !== theme) setTheme(actual);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const toggle = useCallback(() => {
+    const next = document.documentElement.classList.contains("dark") ? "light" : "dark";
+    document.documentElement.classList.toggle("dark", next === "dark");
+    localStorage.setItem("theme", next);
   }, []);
-
-  // Keep <html> class and localStorage in sync — but skip the very first run
-  // (when theme is still the SSR default and initialised is not yet true).
-  useEffect(() => {
-    if (!initialised.current) return;
-    const root = document.documentElement;
-    if (theme === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
-    localStorage.setItem("theme", theme);
-  }, [theme]);
-
-  function toggle() {
-    setTheme((t) => (t === "dark" ? "light" : "dark"));
-  }
 
   return (
     <ThemeContext.Provider value={{ theme, toggle }}>
@@ -54,4 +47,3 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 export function useTheme() {
   return useContext(ThemeContext);
 }
-
