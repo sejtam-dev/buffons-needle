@@ -59,14 +59,14 @@ export default function InfoModal({ onClose }: InfoModalProps) {
         {/* Body */}
         <div className="px-6 py-5 space-y-1 text-sm leading-relaxed max-h-[75vh] overflow-y-auto" style={{ color: "var(--text-muted)" }}>
 
-          <p><MathText text={t("infoIntro")} /></p>
+          <p className="text-justify"><MathText text={t("infoIntro")} /></p>
 
           <SectionTitle><MathText text={t("infoSetupTitle")} /></SectionTitle>
-          <p><MathText text={t("infoSetup")} /></p>
-          <p className="text-xs mt-1" style={{ color: "var(--text-subtle)" }}><MathText text={t("infoConstraint")} /></p>
+          <p className="text-justify"><MathText text={t("infoSetup")} /></p>
+          <p className="text-xs mt-1 text-justify" style={{ color: "var(--text-subtle)" }}><MathText text={t("infoConstraint")} /></p>
 
           <SectionTitle><MathText text={t("infoConditionTitle")} /></SectionTitle>
-          <p><MathText text={t("infoCondition")} /></p>
+          <p className="text-justify"><MathText text={t("infoCondition")} /></p>
           <div className="my-3 py-3 rounded-xl text-center" style={{ background: "var(--bg-panel-alt)" }}>
             <Math block math={String.raw`y_c \bmod d \;\leq\; \frac{l}{2} \left|\sin\theta\right|`} />
           </div>
@@ -75,20 +75,20 @@ export default function InfoModal({ onClose }: InfoModalProps) {
           </p>
 
           <SectionTitle><MathText text={t("infoProbTitle")} /></SectionTitle>
-          <p><MathText text={t("infoProb")} /></p>
+          <p className="text-justify"><MathText text={t("infoProb")} /></p>
           <div className="my-3 py-3 rounded-xl text-center" style={{ background: "var(--bg-panel-alt)" }}>
             <Math block math={String.raw`P = \frac{2l}{d\pi}`} />
           </div>
 
           <SectionTitle><MathText text={t("infoEstimateTitle")} /></SectionTitle>
-          <p><MathText text={t("infoEstimate")} /></p>
+          <p className="text-justify"><MathText text={t("infoEstimate")} /></p>
           <div className="my-3 py-3 rounded-xl text-center" style={{ background: "var(--bg-panel-alt)" }}>
             <Math block math={String.raw`\hat{\pi} \approx \frac{2l \cdot n}{d \cdot c}`} />
           </div>
-          <p><MathText text={t("infoConverge")} /></p>
+          <p className="text-justify"><MathText text={t("infoConverge")} /></p>
 
           <SectionTitle><MathText text={t("infoInteractTitle")} /></SectionTitle>
-          <p><MathText text={t("infoInteract")} /></p>
+          <p className="text-justify"><MathText text={t("infoInteract")} /></p>
         </div>
       </div>
     </div>,
