@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useLayoutEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useLayoutEffect, useRef } from "react";
 
 export type Theme = "dark" | "light";
 
@@ -15,19 +15,22 @@ const ThemeContext = createContext<ThemeContextValue>({
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  // Always start with "dark" on both server and client — matches the SSR default.
-  // useLayoutEffect runs before paint and syncs with whatever the inline theme-init
-  // script already applied to <html>, so there's no visible flash.
   const [theme, setTheme] = useState<Theme>("dark");
+  // Track whether the initial DOM sync has completed — we must not write
+  // localStorage until we've read the real theme from the DOM.
+  const initialised = useRef(false);
 
   useLayoutEffect(() => {
     const actual: Theme = document.documentElement.classList.contains("dark") ? "dark" : "light";
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (actual !== "dark") setTheme(actual);
+    initialised.current = true;
+    if (actual !== theme) setTheme(actual);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Keep <html> class and localStorage in sync whenever theme changes
+  // Keep <html> class and localStorage in sync — but skip the very first run
+  // (when theme is still the SSR default and initialised is not yet true).
   useEffect(() => {
+    if (!initialised.current) return;
     const root = document.documentElement;
     if (theme === "dark") {
       root.classList.add("dark");
